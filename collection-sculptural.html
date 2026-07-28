@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600;6..96,700;6..96,800&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&amp;family=Archivo:wght@400;500;600;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+  html{scroll-behavior:smooth}
+  body{margin:0;background:#EDEAE3;color:#1B1917;font-family:'Archivo',sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+  a{color:#1B1917;text-decoration:none}
+  a:hover{color:var(--accent,#A34A24)}
+  ::selection{background:var(--accent,#A34A24);color:#F5F3EE}
+
+  /* ---- MOBILE (<=760px) ---- */
+  @media (max-width:760px){
+    .m-pad{padding-left:20px !important;padding-right:20px !important}
+    .m-col-head{padding:32px 20px 20px !important}
+    .m-h1{font-size:clamp(40px,12vw,60px) !important}
+    .m-grid-3{grid-template-columns:1fr !important}
+    .m-card-img{height:300px !important}
+    .m-footer{flex-direction:column !important;gap:8px !important}
+    .m-lb{padding:16px !important}
+    .m-lb-nav{width:44px !important;height:44px !important}
+    .m-lb-prev{left:10px !important}
+    .m-lb-next{right:10px !important}
+    .m-burger{display:flex !important}
+    .m-navlinks{display:none !important}
+    .m-navlinks.m-open{display:flex !important;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0 !important;background:rgba(237,234,227,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #D6CFC2;box-shadow:0 22px 46px rgba(27,25,23,.14);padding:6px 20px 16px}
+    .m-navlinks.m-open > *{padding:15px 2px !important;border-bottom:1px solid #E2DBCD !important;font-size:15px !important;width:100%;box-sizing:border-box}
+    .m-navlinks.m-open > a[href$="#inquire"]{margin-top:12px;text-align:center;border-bottom:none !important;padding:16px 0 !important}
+  }
+</style>
+</helmet>
+
+<div style="min-height:100vh">
+
+  <nav data-screen-label="Nav" class="m-pad" style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:72px;background:rgba(237,234,227,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #D6CFC2;box-shadow:{{ navShadow }};transition:box-shadow .35s ease">
+    <a href="index.html#top" style="display:flex;align-items:baseline;gap:10px;color:#1B1917">
+      <span style="font:700 20px/1 'Bodoni Moda',serif;text-transform:uppercase;letter-spacing:.015em">Isaac<span style="margin:0 .05em"> </span>Anderson</span>
+      <span style="position:relative;top:-4px;display:inline-flex;align-items:center;height:21px;box-sizing:border-box;font:600 12.6px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);letter-spacing:.08em;border:1px solid var(--accent,#A34A24);padding:0 8px;line-height:1">ART</span>
+    </a>
+    <button type="button" onClick="{{ toggleNav }}" aria-label="Menu" aria-expanded="{{ navOpen }}" class="m-burger" style="display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:44px;height:44px;background:none;border:none;cursor:pointer;padding:0"><span style="display:block;width:24px;height:2px;background:#1B1917"></span><span style="display:block;width:24px;height:2px;background:#1B1917"></span><span style="display:block;width:24px;height:2px;background:#1B1917"></span></button>
+    <div class="m-navlinks {{ navOpenCls }}" onClick="{{ closeNav }}" style="display:flex;align-items:center;gap:38px">
+      <a href="index.html#commissions" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">01</span>Commissions</a>
+      <a href="index.html#works" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;color:var(--accent,#A34A24);border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">02</span>Works</a>
+      <span aria-disabled="true" title="Coming soon" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;color:#5C564C;padding:6px 0;cursor:default"><span style="font:500 10px 'IBM Plex Mono',monospace;margin-right:6px">03</span>Process</span>
+      <span aria-disabled="true" title="Coming soon" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;color:#5C564C;padding:6px 0;cursor:default"><span style="font:500 10px 'IBM Plex Mono',monospace;margin-right:6px">04</span>About</span>
+      <a href="index.html#inquire" style="background:var(--accent,#A34A24);color:#F5F3EE;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:13px 26px;transition:background .25s ease" style-hover="background:#1B1917;color:#F5F3EE">Inquire</a>
+    </div>
+  </nav>
+
+  <header data-screen-label="Collection header" class="m-col-head" style="padding:56px 48px 32px;max-width:1240px;margin:0 auto;box-sizing:border-box">
+    <a href="index.html#works" style="font:500 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C;display:inline-flex;align-items:center;gap:8px">← Works</a>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-top:22px">
+      <div style="min-width:0">
+        <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--accent,#A34A24);margin-bottom:14px">Collection — No. 021</div>
+        <h1 class="m-h1" style="font:700 clamp(48px,7vw,88px)/0.98 'Bodoni Moda',serif;text-transform:uppercase;letter-spacing:.005em;margin:0">Sculptural</h1>
+      </div>
+      <div style="font:400 13px 'IBM Plex Mono',monospace;color:#5C564C;padding-bottom:10px;flex:none">{{ workCount }} works</div>
+    </div>
+    <p style="font:400 16px/1.65 'Archivo',sans-serif;color:#4A443C;max-width:560px;margin:22px 0 0;text-wrap:pretty">[Collection statement — placeholder copy]</p>
+  </header>
+
+  <section data-screen-label="Works grid" class="m-pad" style="max-width:1240px;margin:0 auto;padding:24px 48px 96px;box-sizing:border-box">
+    <div class="m-grid-3" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px">
+              <div data-i="0" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="sculptural-1" shape="rect" placeholder="Sculptural — piece 1"></image-slot></div>
+          <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 001</span>
+            <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
+          </div>
+        </div>
+        <div data-i="1" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="sculptural-2" shape="rect" placeholder="Sculptural — piece 2"></image-slot></div>
+          <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 002</span>
+            <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
+          </div>
+        </div>
+        <div data-i="2" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="sculptural-3" shape="rect" placeholder="Sculptural — piece 3"></image-slot></div>
+          <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 003</span>
+            <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
+          </div>
+        </div>
+        <div data-i="3" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="sculptural-4" shape="rect" placeholder="Sculptural — piece 4"></image-slot></div>
+          <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 004</span>
+            <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
+          </div>
+        </div>
+        <div data-i="4" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="sculptural-5" shape="rect" placeholder="Sculptural — piece 5"></image-slot></div>
+          <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 005</span>
+            <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
+          </div>
+        </div>
+        <div data-i="5" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="sculptural-6" shape="rect" placeholder="Sculptural — piece 6"></image-slot></div>
+          <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 006</span>
+            <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
+          </div>
+        </div>
+        <div data-i="6" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="sculptural-7" shape="rect" placeholder="Sculptural — piece 7"></image-slot></div>
+          <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 007</span>
+            <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
+          </div>
+        </div>
+        <div data-i="7" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="sculptural-8" shape="rect" placeholder="Sculptural — piece 8"></image-slot></div>
+          <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 008</span>
+            <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
+          </div>
+        </div>
+        <div data-i="8" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="sculptural-9" shape="rect" placeholder="Sculptural — piece 9"></image-slot></div>
+          <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 009</span>
+            <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
+          </div>
+        </div>
+        <div data-i="9" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="sculptural-10" shape="rect" placeholder="Sculptural — piece 10"></image-slot></div>
+          <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 010</span>
+            <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
+          </div>
+        </div>
+        <div data-i="10" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="sculptural-11" shape="rect" placeholder="Sculptural — piece 11"></image-slot></div>
+          <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 011</span>
+            <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
+          </div>
+        </div>
+        <div data-i="11" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="sculptural-12" shape="rect" placeholder="Sculptural — piece 12"></image-slot></div>
+          <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 012</span>
+            <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
+          </div>
+        </div>
+
+    </div>
+  </section>
+
+  <footer data-screen-label="Footer" style="border-top:1px solid #D6CFC2">
+    <div class="m-pad m-footer" style="max-width:1240px;margin:0 auto;padding:30px 48px;box-sizing:border-box;display:flex;justify-content:space-between;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
+      <span>*reserved: Process / Field Notes</span>
+      <span>© Studio — all works cast by hand</span>
+    </div>
+  </footer>
+
+  <sc-if value="{{ lightboxOpen }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Lightbox" onClick="{{ closeLightbox }}" class="m-lb" style="position:fixed;inset:0;z-index:100;background:rgba(15,13,11,.94);display:flex;align-items:center;justify-content:center;padding:64px;box-sizing:border-box">
+      <button type="button" onClick="{{ closeLightbox }}" style="position:absolute;top:26px;right:32px;background:none;border:none;color:#EDEAE3;font:500 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;padding:8px" style-hover="color:var(--accent,#A34A24)">Close ✕</button>
+      <button type="button" onClick="{{ prevImage }}" aria-label="Previous" class="m-lb-nav m-lb-prev" style="position:absolute;left:24px;top:50%;transform:translateY(-50%);background:none;border:1px solid rgba(237,234,227,.3);color:#EDEAE3;width:52px;height:52px;border-radius:50%;cursor:pointer;font:400 20px system-ui,sans-serif;display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s" style-hover="border-color:var(--accent,#A34A24);color:var(--accent,#A34A24)">←</button>
+<sc-if value="{{ lightboxUrl }}" hint-placeholder-val="{{ false }}">
+        <img onClick="{{ stop }}" src="{{ lightboxUrl }}" alt="{{ lightboxCap }}" style="max-width:82vw;max-height:80vh;width:auto;height:auto;object-fit:contain;box-shadow:0 40px 100px rgba(0,0,0,.5)">
+      </sc-if>
+      <button type="button" onClick="{{ nextImage }}" aria-label="Next" class="m-lb-nav m-lb-next" style="position:absolute;right:24px;top:50%;transform:translateY(-50%);background:none;border:1px solid rgba(237,234,227,.3);color:#EDEAE3;width:52px;height:52px;border-radius:50%;cursor:pointer;font:400 20px system-ui,sans-serif;display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s" style-hover="border-color:var(--accent,#A34A24);color:var(--accent,#A34A24)">→</button>
+      <div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font:400 12px 'IBM Plex Mono',monospace;color:#A29B8E;letter-spacing:.08em">{{ lightboxCap }} — {{ lightboxPos }} / {{ workCount }}</div>
+    </div>
+  </sc-if>
+
+</div>
+
+
+<div style="display:none;width:0;height:0;overflow:hidden"><x-import component-from-global-scope="image-slot" from="./image-slot.js" id="loader-slot" hint-size="0,0"></x-import></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#A34A24&quot;,&quot;options&quot;:[&quot;#A34A24&quot;,&quot;#5C6B5D&quot;,&quot;#41506B&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { scrolled: false, lightboxIndex: null, navOpen: false };
+
+  componentDidMount() {
+    this.applyAccent();
+    this._onScroll = () => {
+      const sc = window.scrollY > 8;
+      if (sc !== this.state.scrolled) this.setState({ scrolled: sc });
+    };
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+    this._onKeydown = (e) => {
+      if (this.state.lightboxIndex === null) return;
+      if (e.key === 'Escape') this.setState({ lightboxIndex: null });
+      if (e.key === 'ArrowLeft') this.setState((s) => ({ lightboxIndex: (s.lightboxIndex + 11) % 12 }));
+      if (e.key === 'ArrowRight') this.setState((s) => ({ lightboxIndex: (s.lightboxIndex + 1) % 12 }));
+    };
+    window.addEventListener('keydown', this._onKeydown);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this._onScroll);
+    window.removeEventListener('keydown', this._onKeydown);
+  }
+  componentDidUpdate() { this.applyAccent(); }
+  applyAccent() {
+    document.body.style.setProperty('--accent', this.props.accent ?? '#A34A24');
+  }
+  getSlotUrl(slotId) {
+    const el = document.getElementById(slotId);
+    if (!el) return null;
+    if (el.hasAttribute('data-filled') && el.shadowRoot) {
+      const img = el.shadowRoot.querySelector('.frame img');
+      if (img && img.getAttribute('src')) return img.src;
+    }
+    const sib = el.parentElement && el.parentElement.querySelector('img');
+    return (sib && sib.getAttribute('src')) ? sib.src : null;
+  }
+  openLightbox(i, slotId) {
+    if (this.getSlotUrl(slotId)) this.setState({ lightboxIndex: i });
+  }
+
+  renderVals() {
+    const count = 12;
+    const works = Array.from({ length: count }, (_, i) => {
+      const slot = 'sculptural-' + (i + 1);
+      return {
+        no: 'No. ' + String(i + 1).padStart(3, '0'),
+        slot,
+        placeholder: 'Sculptural — piece ' + (i + 1),
+        onOpen: () => this.openLightbox(i, slot),
+      };
+    });
+    const idx = this.state.lightboxIndex;
+    const lightboxOpen = idx !== null;
+    return {
+      works,
+      workCount: count,
+      navShadow: this.state.scrolled ? '0 10px 32px rgba(27,25,23,.10)' : 'none',
+      navOpen: this.state.navOpen,
+      navOpenCls: this.state.navOpen ? 'm-open' : '',
+      toggleNav: () => this.setState((st) => ({ navOpen: !st.navOpen })),
+      closeNav: () => { if (this.state.navOpen) this.setState({ navOpen: false }); },
+      lightboxOpen,
+      lightboxUrl: lightboxOpen ? this.getSlotUrl(works[idx].slot) : null,
+      lightboxCap: lightboxOpen ? works[idx].no : '',
+      lightboxPos: lightboxOpen ? (idx + 1) : 0,
+      closeLightbox: () => this.setState({ lightboxIndex: null }),
+      prevImage: (e) => { e.stopPropagation(); this.setState((s) => ({ lightboxIndex: (s.lightboxIndex + count - 1) % count })); },
+      nextImage: (e) => { e.stopPropagation(); this.setState((s) => ({ lightboxIndex: (s.lightboxIndex + 1) % count })); },
+      stop: (e) => e.stopPropagation(),
+      openFromEvent: (e) => { const i = +e.currentTarget.getAttribute('data-i'); this.openLightbox(i, 'sculptural-' + (i + 1)); },
+    };
+  }
+}
+
+</script>
+</body>
+</html>

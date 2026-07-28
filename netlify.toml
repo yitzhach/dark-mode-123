@@ -1,0 +1,8 @@
+[build]
+  publish = "."
+
+# Serve the JSON image store with the right type
+[[headers]]
+  for = "/image-slots.state.json"
+  [headers.values]
+    Content-Type = "application/json"
