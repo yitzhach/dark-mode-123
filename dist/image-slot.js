@@ -464,9 +464,9 @@
   }
 
   // ── Second-image swap driver ────────────────────────────────────────────
-  // Pointer devices swap on hover; touch devices swap the slot closest to
-  // the middle of the viewport, hold, and return. A slot without a second
-  // image never registers, so this is inert on ordinary pages.
+  // Pointer devices swap on hover; touch devices swap while a finger is held
+  // on the image and fade back on release. A slot without a second image
+  // never binds, so this is inert on ordinary pages.
   const canHover = () => {
     try { return window.matchMedia('(hover: hover) and (pointer: fine)').matches; }
     catch (e) { return true; }
@@ -475,46 +475,7 @@
     try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
     catch (e) { return false; }
   };
-  const SWAP_BAND = 0.35;   // middle 35% of the viewport reads as 'centered'
-  const SWAP_FADE = 700;
-  const SWAP_HOLD = 3000;
-  const swapSet = new Set();
-  let swapRaf = 0, swapActive = null, swapBound = false;
-  function swapTick() {
-    swapRaf = 0;
-    const vh = window.innerHeight || 1;
-    const mid = vh / 2, half = vh * SWAP_BAND / 2;
-    let best = null, bestD = Infinity;
-    swapSet.forEach((el) => {
-      if (!el.isConnected) return;
-      const r = el.getBoundingClientRect();
-      if (!r.height) return;
-      const d = Math.abs(r.top + r.height / 2 - mid);
-      if (d <= half && d < bestD) { bestD = d; best = el; }
-    });
-    if (best === swapActive) return;
-    swapActive = best;
-    // The slot leaving the band is deliberately left alone: it holds what
-    // it is showing and its own timer finishes the return, so a crossfade
-    // in progress is never cut short.
-    if (best) best._scrollTrigger();
-  }
-  const queueSwapTick = () => { if (!swapRaf) swapRaf = requestAnimationFrame(swapTick); };
-  function registerSwap(el, on) {
-    if (canHover()) return;
-    if (!on) {
-      swapSet.delete(el);
-      if (swapActive === el) swapActive = null;
-      return;
-    }
-    swapSet.add(el);
-    if (!swapBound) {
-      swapBound = true;
-      window.addEventListener('scroll', queueSwapTick, { passive: true });
-      window.addEventListener('resize', queueSwapTick);
-    }
-    queueSwapTick();
-  }
+  const SWAP_MOVE = 12;   // px of finger travel that reads as a scroll, not a press
 
   // ── Custom element ──────────────────────────────────────────────────────
   const stylesheet =
@@ -645,7 +606,7 @@
     // Second image (hover / scroll swap). Same .frame img geometry math,
     // its own crop; opacity is the only animated property. Opt-in per page
     // with the `swap` attribute, per slot by actually having an image 2.
-    '.frame img.b{opacity:0;transition:opacity .7s ease}' +
+    '.frame img.b{opacity:0;transition:opacity 1.05s ease}' +
     ':host([data-swap-on]) .frame img.b{opacity:1}' +
     '@media (prefers-reduced-motion:reduce){.frame img.b{transition:none}}' +
     '.two{position:fixed;margin:0;inset:auto;border:0;padding:8px;z-index:12;width:196px;' +
@@ -1183,6 +1144,29 @@
         this._ctl.addEventListener('pointerenter', this._ctlIn);
         this._ctl.addEventListener('pointerleave', this._ctlOut);
       }
+      // Touch devices: hold a finger on the image to show image 2, release to
+      // fade back. A finger that travels is a scroll, so the swap cancels.
+      if (!canHover() && !this._touchOn) {
+        this._touchOn = true;
+        this._touchScopeEl = this._swapScope();
+        this._onTouchStart = (e) => {
+          const t = e.touches && e.touches[0];
+          this._touchY = t ? t.clientY : 0;
+          this._touchX = t ? t.clientX : 0;
+          this._swapTo(true);
+        };
+        this._onTouchMove = (e) => {
+          const t = e.touches && e.touches[0];
+          if (!t) return;
+          if (Math.abs(t.clientY - this._touchY) > SWAP_MOVE ||
+              Math.abs(t.clientX - this._touchX) > SWAP_MOVE) this._swapTo(false);
+        };
+        this._onTouchEnd = () => this._swapTo(false);
+        this._touchScopeEl.addEventListener('touchstart', this._onTouchStart, { passive: true });
+        this._touchScopeEl.addEventListener('touchmove', this._onTouchMove, { passive: true });
+        this._touchScopeEl.addEventListener('touchend', this._onTouchEnd, { passive: true });
+        this._touchScopeEl.addEventListener('touchcancel', this._onTouchEnd, { passive: true });
+      }
       load();
       this._render();
     }
@@ -1196,7 +1180,13 @@
       this.removeEventListener('drop', this);
       if (this._ro) { this._ro.disconnect(); this._ro = null; }
       clearTimeout(this._holdT);
-      registerSwap(this, false);
+      if (this._touchOn) {
+        this._touchOn = false;
+        this._touchScopeEl.removeEventListener('touchstart', this._onTouchStart);
+        this._touchScopeEl.removeEventListener('touchmove', this._onTouchMove);
+        this._touchScopeEl.removeEventListener('touchend', this._onTouchEnd);
+        this._touchScopeEl.removeEventListener('touchcancel', this._onTouchEnd);
+      }
       if (this._hoverOn) {
         this._hoverOn = false;
         this._hoverScopeEl.removeEventListener('pointerenter', this._onSwapIn);
@@ -1238,16 +1228,6 @@
       if (on && this._swapBlocked()) return;
       if (!on) clearTimeout(this._holdT);
       this.toggleAttribute('data-swap-on', !!on);
-    }
-
-    // Touch path: fade in, hold, fade back. Re-armed every time the slot
-    // re-enters the centered band.
-    _scrollTrigger() {
-      if (!this.hasAttribute('data-second') || this._swapBlocked()) return;
-      clearTimeout(this._holdT);
-      this._swapTo(true);
-      const back = reducedMotion() ? SWAP_HOLD : SWAP_FADE + SWAP_HOLD;
-      this._holdT = setTimeout(() => this._swapTo(false), back);
     }
 
     _swapScope() {
@@ -1352,7 +1332,6 @@
         this.removeAttribute('data-second');
         this.removeAttribute('data-swap-on');
       }
-      registerSwap(this, has);
       if (this.hasAttribute('data-two')) this._syncTwoUI();
     }
 
