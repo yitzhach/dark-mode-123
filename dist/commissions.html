@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<meta name="theme-color" content="#EDEAE3">
+<link rel="icon" href="./favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="manifest" href="./site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600;6..96,700;6..96,800&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&amp;family=Archivo:wght@400;500;600;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+  html{scroll-behavior:smooth}
+  body{margin:0;background:#EDEAE3;color:#1B1917;font-family:'Archivo',sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+  a{color:#1B1917;text-decoration:none}
+  a:hover{color:var(--accent,#A34A24)}
+  ::selection{background:var(--accent,#A34A24);color:#F5F3EE}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0ms !important;transition-duration:.01ms !important}
+  }
+
+  /* ---- MOBILE (<=760px) ---- */
+  @media (max-width:760px){
+    .m-pad{padding-left:max(20px,env(safe-area-inset-left)) !important;padding-right:max(20px,env(safe-area-inset-right)) !important}
+    .m-nav{height:60px !important}
+    .m-tap{min-height:44px !important;display:inline-flex !important;align-items:center;justify-content:center}
+    .m-col-head{padding:32px 20px 20px !important}
+    .m-h1{font-size:clamp(40px,12vw,60px) !important}
+    .m-process{grid-template-columns:1fr !important;gap:32px !important}
+    .m-process > div{border-left:none !important;border-top:1px solid #D6CFC2 !important;padding:20px 0 0 !important}
+    .m-process > div:first-child{border-top:none !important;padding-top:0 !important}
+    .m-intro{grid-template-columns:1fr !important;gap:28px !important}
+    .m-form{grid-template-columns:1fr !important;gap:32px !important;padding:30px 22px !important}
+    .m-form2{grid-template-columns:1fr !important}
+    .m-form3{grid-template-columns:1fr !important}
+    .m-footer{flex-direction:column !important;gap:8px !important;padding-bottom:max(14px,env(safe-area-inset-bottom)) !important}
+    .m-form input,.m-form select,.m-form textarea{font-size:16px !important;padding:14px !important}
+    .m-burger{display:flex !important}
+    .m-navlinks{display:none !important}
+    .m-navlinks.m-open{display:flex !important;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0 !important;background:rgba(237,234,227,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #D6CFC2;box-shadow:0 22px 46px rgba(27,25,23,.14);padding:6px 20px 16px}
+    .m-navlinks.m-open > *{padding:15px 2px !important;border-bottom:1px solid #E2DBCD !important;font-size:15px !important;width:100%;box-sizing:border-box}
+    .m-navlinks.m-open > a[href$="#inquire"]{margin-top:12px;text-align:center;border-bottom:none !important;padding:16px 0 !important}
+    .m-fab-top{display:flex !important}
+  }
+  @media (hover:none){
+    .m-press{transition:transform .18s ease}
+    .m-press:active{transform:scale(.985)}
+    .m-tap:active,.m-submit:active{border-color:var(--accent,#A34A24) !important;color:var(--accent,#A34A24) !important}
+  }
+  @media (min-width:761px) and (max-width:1024px){
+    .m-pad{padding-left:32px !important;padding-right:32px !important}
+    .m-col-head{padding:44px 32px 26px !important}
+    .m-nav{padding:0 32px !important}
+    .m-intro{gap:40px !important}
+  }
+</style>
+</helmet>
+
+<div style="min-height:100vh">
+
+  <nav data-screen-label="Nav" class="m-pad m-nav" style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:72px;background:rgba(237,234,227,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #D6CFC2;box-shadow:{{ navShadow }};transform:{{ navTransform }};transition:box-shadow .35s ease,transform .3s ease">
+    <a href="index.html#top" style="display:flex;align-items:baseline;gap:10px;color:#1B1917">
+      <span style="font:700 20px/1 'Bodoni Moda',serif;text-transform:uppercase;letter-spacing:.015em">Isaac<span style="margin:0 .05em"> </span>Anderson</span>
+      <span style="position:relative;top:-4px;display:inline-flex;align-items:center;height:21px;box-sizing:border-box;font:600 12.6px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);letter-spacing:.08em;border:1px solid var(--accent,#A34A24);padding:0 8px;line-height:1">ART</span>
+    </a>
+    <button type="button" onClick="{{ toggleNav }}" aria-label="Menu" aria-expanded="{{ navOpen }}" class="m-burger" style="display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:44px;height:44px;background:none;border:none;cursor:pointer;padding:0"><span style="display:block;width:24px;height:2px;background:#1B1917"></span><span style="display:block;width:24px;height:2px;background:#1B1917"></span><span style="display:block;width:24px;height:2px;background:#1B1917"></span></button>
+    <div class="m-navlinks {{ navOpenCls }}" onClick="{{ closeNav }}" style="display:flex;align-items:center;gap:38px">
+      <a href="commissions.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;color:var(--accent,#A34A24);border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">01</span>Commissions</a>
+      <a href="index.html#works" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">02</span>Works</a>
+      <span aria-disabled="true" title="Coming soon" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;color:#5C564C;padding:6px 0;cursor:default"><span style="font:500 10px 'IBM Plex Mono',monospace;margin-right:6px">03</span>Process</span>
+      <span aria-disabled="true" title="Coming soon" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;color:#5C564C;padding:6px 0;cursor:default"><span style="font:500 10px 'IBM Plex Mono',monospace;margin-right:6px">04</span>About</span>
+      <a href="#inquire" style="background:var(--accent,#A34A24);color:#F5F3EE;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:13px 26px;transition:background .25s ease" style-hover="background:#1B1917;color:#F5F3EE">Inquire</a>
+    </div>
+  </nav>
+
+  <header data-screen-label="Commissions header" class="m-col-head" style="padding:56px 48px 32px;max-width:1240px;margin:0 auto;box-sizing:border-box">
+    <a href="index.html#top" style="font:500 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C;display:inline-flex;align-items:center;gap:8px">← Home</a>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-top:22px">
+      <div style="min-width:0">
+        <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--accent,#A34A24);margin-bottom:14px">Commissions — No. 01</div>
+        <h1 class="m-h1" style="font:700 clamp(48px,7vw,88px)/0.98 'Bodoni Moda',serif;text-transform:uppercase;letter-spacing:.005em;margin:0">Commissions</h1>
+      </div>
+    </div>
+    <p style="font:400 16px/1.65 'Archivo',sans-serif;color:#4A443C;max-width:640px;margin:22px 0 0;text-wrap:pretty">Site-specific work in cement, plaster, and steel — developed with architects, designers, and private collectors from first sketch to final install. Interior or exterior, one piece or a full program.</p>
+  </header>
+
+  <section data-screen-label="Intro" class="m-pad" style="max-width:1240px;margin:0 auto;padding:24px 48px 88px;box-sizing:border-box">
+    <div class="m-intro" style="display:grid;grid-template-columns:1fr 1.1fr;gap:64px;align-items:center">
+      <div style="height:420px;min-width:0;overflow:hidden;box-shadow:0 20px 48px rgba(27,25,23,.10)"><image-slot id="commission-intro" shape="rect" placeholder="Commission — in-progress studio shot" src="images/commission-intro.webp"></image-slot></div>
+      <div>
+        <h2 style="font:400 30px/1.3 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 18px;text-wrap:pretty">Every commission begins with a conversation about the space, the aesthetic, and the experience the finished piece is meant to create.</h2>
+        <p style="font: 400 15px/1.75 'Archivo',sans-serif; color: #4A443C; margin: 0 0 16px; text-wrap: pretty; font-style: italic">Commissioned work can be found in private collections, hospitality, and commercial spaces across the country.&nbsp; Every commission is unique, inspired by its setting and built to endure<span style="font-size: 14.5px; font-style: normal;">.</span></p>
+        
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="Process" class="m-pad" style="max-width:1240px;margin:0 auto;padding:0 48px 96px;box-sizing:border-box;border-top:1px solid #D6CFC2">
+    <div style="display:flex;align-items:baseline;gap:16px;margin:56px 0 44px">
+      <span style="font:600 11px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);letter-spacing:.12em">02</span>
+      <h2 style="font:400 36px/1.15 'Newsreader',serif;letter-spacing:-.015em;margin:0">The process</h2>
+    </div>
+    <div class="m-process" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px">
+      <div style="border-left:1px solid #D6CFC2;padding:2px 0 0 24px">
+        <div style="font:500 11px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);letter-spacing:.1em;margin-bottom:12px">01 — Consultation</div>
+        <p style="font:400 14.5px/1.7 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">A conversation about the site, scale, and use — in person or by video, with reference material from prior work.</p>
+      </div>
+      <div style="border-left:1px solid #D6CFC2;padding:2px 0 0 24px">
+        <div style="font:500 11px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);letter-spacing:.1em;margin-bottom:12px">02 — Concept</div>
+        <p style="font:400 14.5px/1.7 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">A direction, material palette, and quote — refined until the form, vision, and budget align.</p>
+      </div>
+      <div style="border-left:1px solid #D6CFC2;padding:2px 0 0 24px">
+        <div style="font:500 11px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);letter-spacing:.1em;margin-bottom:12px">03 — Fabrication</div>
+        <p style="font:400 14.5px/1.7 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Designed, created, and finished in studio — with progress photos shared as the piece develops.</p>
+      </div>
+      <div style="border-left:1px solid #D6CFC2;padding:2px 0 0 24px">
+        <div style="font:500 11px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);letter-spacing:.1em;margin-bottom:12px">04 — Install</div>
+        <p style="font:400 14.5px/1.7 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Delivered and installed on site throughout the U.S. and internationally.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="inquire" data-screen-label="Inquiry form" class="m-pad" style="max-width:1240px;margin:0 auto;padding:0 48px 96px;box-sizing:border-box">
+    <div class="m-form" style="border:1px solid #1B1917;background:#F5F3EE;padding:56px;display:grid;grid-template-columns:1fr 1.4fr;gap:64px;box-shadow:0 32px 80px rgba(27,25,23,.10)">
+      <div>
+        <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--accent,#A34A24);margin-bottom:16px">Inquire</div>
+        <h2 style="font:400 33px/1.2 'Newsreader',serif;letter-spacing:-.015em;margin:0 0 16px">Start a commission</h2>
+        <p style="font:400 14.5px/1.7 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">A few details. One conversation. From there, the studio will respond within two business days with thoughtful questions, project timing, and—if the project is a good fit—an initial concept direction.</p>
+        <div style="font:400 12px/2.1 'IBM Plex Mono',monospace;color:#5C564C;margin-top:30px;border-top:1px solid #D6CFC2;padding-top:20px"><a href="mailto:studio@[domain]" style="color: inherit;">email: isaac@[domain]</a><br>Studio — Southern California &amp; Appalachia<br><a href="https://www.instagram.com/isaacandersonart/">Instagram</a></div>
+      </div>
+      <sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+        <form onSubmit="{{ submit }}" style="display:flex;flex-direction:column;gap:18px">
+          <div class="m-form2" style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+            <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Name
+              <input type="text" placeholder="Full name" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Email
+              <input type="email" placeholder="you@email.com" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+            </label>
+          </div>
+          <div class="m-form3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px">
+            <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Phone <span style="text-transform:none;letter-spacing:0">(optional)</span>
+              <input type="tel" placeholder="+1 555 000 0000" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Project type
+              <select style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+                <option>Private Collection</option><option>Hospitality</option><option>Lobby / Commercial</option><option>Other</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Timeline
+              <select style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+                <option>Within 3 months</option><option>3–6 months</option><option>6+ months</option><option>Exploring</option>
+              </select>
+            </label>
+          </div>
+          <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Project location
+            <input type="text" placeholder="City, country" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Anything else <span style="text-transform:none;letter-spacing:0">(optional)</span>
+            <input type="text" placeholder="Space, scale, or the feeling you're after" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+          </label>
+          <button type="submit" class="m-submit" style="align-self:flex-start;background:var(--accent,#A34A24);color:#F5F3EE;border:none;cursor:pointer;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:13px 26px;margin-top:6px;transition:background .25s ease" style-hover="background:#1B1917">Send inquiry</button>
+        </form>
+      </sc-if>
+      <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+        <div aria-live="polite" style="display:flex;flex-direction:column;justify-content:center;gap:12px">
+          <div style="font:400 27px 'Newsreader',serif;font-style:italic">Received.</div>
+          <div style="font:400 14.5px/1.7 'Archivo',sans-serif;color:#4A443C;max-width:400px;text-wrap:pretty">Thank you — the studio will reply within two working days.</div>
+        </div>
+      </sc-if>
+    </div>
+  </section>
+
+  <footer data-screen-label="Footer" style="border-top:1px solid #D6CFC2">
+    <div class="m-pad m-footer" style="max-width:1240px;margin:0 auto;padding:30px 48px;box-sizing:border-box;display:flex;justify-content:space-between;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
+      <span>© {{ copyrightYear }} Isaac Anderson Art</span>
+      
+    </div>
+  </footer>
+
+  <button type="button" class="m-fab-top" onClick="{{ scrollTop }}" aria-label="Back to top" style="display:none;position:fixed;left:calc(16px + env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;background:#F5F3EE;color:#1B1917;border:1px solid #1B1917;font:600 15px 'IBM Plex Mono',monospace;width:44px;height:44px;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 12px 28px rgba(27,25,23,.18);opacity:{{ topOpacity }};transform:{{ topTransform }};transition:opacity .3s ease,transform .3s ease;pointer-events:{{ topPointer }}">↑</button>
+
+</div>
+
+<div style="display:none;width:0;height:0;overflow:hidden"><x-import component-from-global-scope="image-slot" from="./image-slot.js" id="loader-slot" hint-size="0,0"></x-import></div>
+
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" data-bg-color="#EDEAE3">
+<rect width="200" height="200" fill="#EDEAE3"></rect>
+<rect x="60" y="45" width="35" height="110" fill="none" stroke="#A34A24" stroke-width="3"></rect>
+<circle cx="140" cy="100" r="32" fill="none" stroke="#1B1917" stroke-width="3"></circle>
+</svg>
+</template>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#A34A24&quot;,&quot;options&quot;:[&quot;#A34A24&quot;,&quot;#5C6B5D&quot;,&quot;#41506B&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { scrolled: false, navOpen: false, navHidden: false, topVisible: false, sent: false };
+
+  componentDidMount() {
+    this.applyAccent();
+    this._onScroll = () => {
+      const y = window.scrollY;
+      const sc = y > 8;
+      if (sc !== this.state.scrolled) this.setState({ scrolled: sc });
+      const isMobile = window.matchMedia && window.matchMedia('(max-width:760px)').matches;
+      if (isMobile) {
+        const dy = y - (this._lastY ?? y);
+        let navHidden = this.state.navHidden;
+        if (y < 80) navHidden = false;
+        else if (dy > 4) navHidden = true;
+        else if (dy < -4) navHidden = false;
+        const topVisible = y > 300;
+        if (navHidden !== this.state.navHidden || topVisible !== this.state.topVisible) {
+          this.setState({ navHidden, topVisible });
+        }
+      } else if (this.state.navHidden || this.state.topVisible) {
+        this.setState({ navHidden: false, topVisible: false });
+      }
+      this._lastY = y;
+    };
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+  }
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this._onScroll);
+  }
+  componentDidUpdate() { this.applyAccent(); }
+  applyAccent() {
+    document.body.style.setProperty('--accent', this.props.accent ?? '#A34A24');
+  }
+
+  renderVals() {
+    return {
+      copyrightYear: new Date().getFullYear(),
+      navShadow: this.state.scrolled ? '0 10px 32px rgba(27,25,23,.10)' : 'none',
+      navOpen: this.state.navOpen,
+      navOpenCls: this.state.navOpen ? 'm-open' : '',
+      toggleNav: () => this.setState((st) => { const open = !st.navOpen; document.body.style.overflow = open ? 'hidden' : ''; return { navOpen: open }; }),
+      closeNav: () => { if (this.state.navOpen) { document.body.style.overflow = ''; this.setState({ navOpen: false }); } },
+      navTransform: this.state.navHidden ? 'translateY(-100%)' : 'translateY(0)',
+      topOpacity: this.state.topVisible ? 1 : 0,
+      topTransform: this.state.topVisible ? 'translateY(0)' : 'translateY(14px)',
+      topPointer: this.state.topVisible ? 'auto' : 'none',
+      scrollTop: () => window.scrollTo({ top: 0, behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches) ? 'auto' : 'smooth' }),
+      sent: this.state.sent,
+      notSent: !this.state.sent,
+      submit: (e) => { e.preventDefault(); this.setState({ sent: true }); },
+    };
+  }
+}
+
+</script>
+</body>
+</html>
