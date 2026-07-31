@@ -89,6 +89,46 @@
 
 (() => {
   const STATE_FILE = 'image-slots.state.json';
+  // Per-slot sidecars: image bytes live one-image-per-file so every write
+  // clears the host's ~2MB write ceiling (the shared file used to hold every
+  // image and silently stopped persisting new drops once it grew past it).
+  // The host allowlists *.state.json basenames only, hence the naming.
+  const slotFile = (id) => 'slot-' + String(id).replace(/[^\w.-]/g, '_') + '.state.json';
+  // ids whose bytes are known to be on disk in their own sidecar.
+  const sidecarWritten = new Set();
+  const bytesOf = (v) => (typeof v === 'string' ? v : (v && v.u)) || '';
+  const isData = (u) => /^data:image\//i.test(u || '');
+  // Shared file keeps crop/look/flags only. A data-URL entry is reduced to
+  // d:1, meaning "bytes are in slot-<id>.state.json"; short path refs
+  // (images/<id>.webp) stay inline since they cost nothing.
+  function strip(v) {
+    if (!v) return v;
+    if (typeof v === 'string') return isData(v) ? { d: 1, s: 1, x: 0, y: 0 } : { u: v, s: 1, x: 0, y: 0 };
+    const out = {};
+    for (const k in v) if (k !== 'u' && k !== 'd') out[k] = v[k];
+    if (v.u && isData(v.u)) out.d = 1;
+    else if (v.u) out.u = v.u;
+    return out;
+  }
+  function sharedPayload() {
+    const out = {};
+    for (const id in slots) out[id] = strip(slots[id]);
+    return out;
+  }
+  function writeSidecar(id, u) {
+    const w = window.omelette && window.omelette.writeFile;
+    if (!w || !id || !u) return Promise.resolve();
+    return Promise.resolve(w(slotFile(id), JSON.stringify({ u: u })))
+      .then(() => { sidecarWritten.add(id); }, () => {});
+  }
+  // Any in-memory image whose bytes aren't on disk yet (fresh drop, or a
+  // legacy entry adopted from the old shared file).
+  function pendingIds() {
+    return Object.keys(slots).filter((id) => {
+      const u = bytesOf(slots[id]);
+      return isData(u) && !sidecarWritten.has(id);
+    });
+  }
 
   // Unsplash terms require visible attribution wherever their photos
   // display, and every link back to unsplash.com must carry utm referral
@@ -166,6 +206,26 @@
   let loaded = false;
   let loadP = null;
 
+  // Adopt bytes from each slot's own sidecar. Entries flagged d:1 have their
+  // image there; entries the old shared file still carries inline are left
+  // alone (they get migrated to a sidecar on the next save).
+  function loadSidecars() {
+    const ids = Object.keys(slots).filter((id) => {
+      const v = slots[id];
+      return v && typeof v === 'object' && v.d && !v.u;
+    });
+    if (!ids.length) return Promise.resolve();
+    return Promise.all(ids.map((id) => fetch(slotFile(id))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((sc) => {
+        const u = sc && typeof sc === 'object' ? sc.u : null;
+        if (!isData(u)) return;
+        sidecarWritten.add(id);
+        if (slots[id] && !slots[id].u) slots[id].u = u;
+      })
+      .catch(() => {})));
+  }
+
   function load() {
     if (loadP) return loadP;
     loadP = fetch(STATE_FILE)
@@ -188,6 +248,8 @@
         }
         tombstones.clear();
       })
+      .catch(() => {})
+      .then(() => loadSidecars())
       .catch(() => {})
       .then(() => { loaded = true; subs.forEach((fn) => fn()); });
     return loadP;
@@ -214,14 +276,21 @@
     if (!loaded) return;
     const w = window.omelette && window.omelette.writeFile;
     if (!w) return;
-    try { Promise.resolve(w(STATE_FILE, JSON.stringify(slots))).catch(() => {}); } catch (e) {}
+    try {
+      pendingIds().forEach((id) => writeSidecar(id, bytesOf(slots[id])));
+      Promise.resolve(w(STATE_FILE, JSON.stringify(sharedPayload()))).catch(() => {});
+    } catch (e) {}
   }
+  // Bytes first (one write per image, each well under the ceiling), then the
+  // small shared file — so the shared file never claims d:1 for an image
+  // that isn't on disk yet.
   function save() {
     if (saving) { saveDirty = true; return; }
     const w = window.omelette && window.omelette.writeFile;
     if (!w) return;
     saving = true;
-    Promise.resolve(w(STATE_FILE, JSON.stringify(slots)))
+    Promise.all(pendingIds().map((id) => writeSidecar(id, bytesOf(slots[id]))))
+      .then(() => Promise.resolve(w(STATE_FILE, JSON.stringify(sharedPayload()))))
       .catch(() => {})
       .then(() => { saving = false; if (saveDirty) { saveDirty = false; save(); } });
   }
@@ -245,6 +314,11 @@
   // a reorder and persists it only when the user confirms (ImageSlots.commit).
   function setSlot(id, val, quiet) {
     if (!id) return;
+    // Global undo: skip quiet writes (persist:false) — those are the
+    // arrange-images.js staged reorders, which already have their own
+    // Save/Revert. Every other write (drop, replace, remove, reframe,
+    // adjust) is a discrete user action worth one undo step.
+    if (!quiet) pushUndo(id, slots[id], val || undefined);
     if (val) { slots[id] = val; tombstones.delete(id); }
     else { delete slots[id]; if (!loaded) tombstones.add(id); }
     subs.forEach((fn) => fn());
@@ -389,6 +463,59 @@
     return 'url(#' + id + ')';
   }
 
+  // ── Second-image swap driver ────────────────────────────────────────────
+  // Pointer devices swap on hover; touch devices swap the slot closest to
+  // the middle of the viewport, hold, and return. A slot without a second
+  // image never registers, so this is inert on ordinary pages.
+  const canHover = () => {
+    try { return window.matchMedia('(hover: hover) and (pointer: fine)').matches; }
+    catch (e) { return true; }
+  };
+  const reducedMotion = () => {
+    try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+    catch (e) { return false; }
+  };
+  const SWAP_BAND = 0.35;   // middle 35% of the viewport reads as 'centered'
+  const SWAP_FADE = 700;
+  const SWAP_HOLD = 3000;
+  const swapSet = new Set();
+  let swapRaf = 0, swapActive = null, swapBound = false;
+  function swapTick() {
+    swapRaf = 0;
+    const vh = window.innerHeight || 1;
+    const mid = vh / 2, half = vh * SWAP_BAND / 2;
+    let best = null, bestD = Infinity;
+    swapSet.forEach((el) => {
+      if (!el.isConnected) return;
+      const r = el.getBoundingClientRect();
+      if (!r.height) return;
+      const d = Math.abs(r.top + r.height / 2 - mid);
+      if (d <= half && d < bestD) { bestD = d; best = el; }
+    });
+    if (best === swapActive) return;
+    swapActive = best;
+    // The slot leaving the band is deliberately left alone: it holds what
+    // it is showing and its own timer finishes the return, so a crossfade
+    // in progress is never cut short.
+    if (best) best._scrollTrigger();
+  }
+  const queueSwapTick = () => { if (!swapRaf) swapRaf = requestAnimationFrame(swapTick); };
+  function registerSwap(el, on) {
+    if (canHover()) return;
+    if (!on) {
+      swapSet.delete(el);
+      if (swapActive === el) swapActive = null;
+      return;
+    }
+    swapSet.add(el);
+    if (!swapBound) {
+      swapBound = true;
+      window.addEventListener('scroll', queueSwapTick, { passive: true });
+      window.addEventListener('resize', queueSwapTick);
+    }
+    queueSwapTick();
+  }
+
   // ── Custom element ──────────────────────────────────────────────────────
   const stylesheet =
     // Fill the container by default: slots are usually placed inside a
@@ -515,6 +642,27 @@
     ':host([data-reframe]) .ctl button[data-act="reset"]{display:inline-block}' +
     '.ctl button[data-act="remove"]{padding:5px 8px;font-size:12px;line-height:1}' +
     '.ctl button[data-act="remove"][data-armed]{background:#a3341a;padding:5px 10px;font-size:11px}' +
+    // Second image (hover / scroll swap). Same .frame img geometry math,
+    // its own crop; opacity is the only animated property. Opt-in per page
+    // with the `swap` attribute, per slot by actually having an image 2.
+    '.frame img.b{opacity:0;transition:opacity .7s ease}' +
+    ':host([data-swap-on]) .frame img.b{opacity:1}' +
+    '@media (prefers-reduced-motion:reduce){.frame img.b{transition:none}}' +
+    '.two{position:fixed;margin:0;inset:auto;border:0;padding:8px;z-index:12;width:196px;' +
+    '  border-radius:10px;background:rgba(20,18,16,.88);backdrop-filter:blur(8px);' +
+    '  color:#F5F3EE;font:11px/1.3 system-ui,-apple-system,sans-serif;' +
+    '  box-shadow:0 10px 30px rgba(0,0,0,.35);display:none}' +
+    '.two:popover-open{display:flex;flex-direction:column;gap:5px}' +
+    '.two .hint{padding:1px 2px 4px;opacity:.55;font-size:10px}' +
+    '.two button{appearance:none;border:0;border-radius:6px;padding:6px 9px;cursor:pointer;' +
+    '  text-align:left;font:11px/1.25 system-ui,-apple-system,sans-serif;' +
+    '  background:rgba(255,255,255,.14);color:#F5F3EE}' +
+    '.two button:hover{background:rgba(255,255,255,.26)}' +
+    '.two button[data-act="two-remove"]{background:rgba(163,52,26,.5)}' +
+    '.ctl button[data-act="two"]{display:none}' +
+    ':host([swap]) .ctl button[data-act="two"]{display:inline-block}' +
+    '.ctl button[data-act="two"][data-on]{background:#c96442;color:#fff}' +
+    ':host([data-two]) .ctl{opacity:1;pointer-events:auto}' +
     '.err{position:absolute;left:8px;bottom:8px;right:8px;color:#b3261e;font-size:11px;' +
     '  background:rgba(255,255,255,.85);padding:4px 6px;border-radius:5px;pointer-events:none}' +
     '.credit{position:absolute;left:6px;bottom:6px;max-width:calc(100% - 12px);display:none;' +
@@ -626,6 +774,7 @@
         '<style>' + stylesheet + '</style>' +
         '<div class="frame" part="frame">' +
         '  <img part="image" alt="" draggable="false" loading="lazy" decoding="async" style="display:none">' +
+        '  <img class="b" part="image-second" alt="" draggable="false" loading="lazy" decoding="async" style="display:none">' +
         '  <div class="empty" part="empty">' + icon +
         '    <div class="cap"></div>' +
         '    <div class="sub">or <u>browse files</u></div></div>' +
@@ -652,6 +801,7 @@
         '<div class="ctl" popover="manual" data-dc-edit-transparent><button data-act="replace" title="Replace image">Replace</button>' +
         '  <button data-act="edit" title="Reframe image">Edit</button>' +
         '  <button data-act="adjust" title="Adjust contrast, colour and tone">Adjust</button>' +
+        '  <button data-act="two" title="Second image \u2014 shown on hover">Img 2</button>' +
         '  <button data-act="reset" title="Reset size, stretch and position">Reset</button>' +
         '  <button data-act="remove" title="Remove image">✕</button></div>' +
         '<input type="file" accept="' + ACCEPT.join(',') + '" hidden>';
@@ -693,9 +843,32 @@
         this._applyAdj();
         this._commitAdj();
       });
+      // Second-image panel: the only place image 2 is set, reframed or
+      // removed — the grid itself shows no indicator that one exists.
+      const two = document.createElement('div');
+      two.className = 'two';
+      two.setAttribute('popover', 'manual');
+      two.setAttribute('data-dc-edit-transparent', '');
+      two.innerHTML =
+        '<div class="hint"></div>' +
+        '<button data-act="two-upload">Upload a photo\u2026</button>' +
+        '<button data-act="two-zoom">Use a zoom of image 1</button>' +
+        '<button data-act="two-reframe">Reframe image 2</button>' +
+        '<button data-act="two-remove">Remove image 2</button>';
+      root.appendChild(two);
+      ['pointerdown', 'click', 'dblclick'].forEach((t) =>
+        two.addEventListener(t, (e) => {
+          const el = e.target;
+          if (t === 'click' && el && el.closest && el.closest('[data-act]')) return;
+          e.stopPropagation();
+        }));
+      this._twoPanel = two;
+      this._view2 = { s: 1, r: 1, x: 0, y: 0 };
+      this._t2 = false;
       this._frame = root.querySelector('.frame');
       this._ring = root.querySelector('.ring');
       this._img = root.querySelector('.frame img');
+      this._imgB = root.querySelector('.frame img.b');
       this._empty = root.querySelector('.empty');
       this._cap = root.querySelector('.cap');
       this._sub = root.querySelector('.sub');
@@ -753,6 +926,40 @@
           this._commitView();
           return;
         }
+        if (act === 'two' || act.indexOf('two-') === 0) {
+          this._disarm();
+          if (act === 'two') {
+            if (this.hasAttribute('data-two')) this._closeTwo(); else this._openTwo();
+            return;
+          }
+          if (act === 'two-upload') {
+            this._ingestTo2 = true;
+            this._closeTwo();
+            this._input.click();
+            return;
+          }
+          if (act === 'two-zoom') {
+            const id = this._secondId();
+            if (!id) return;
+            // No new pixels: image 2 references image 1's bytes and keeps
+            // only its own crop. Start one step tighter than image 1's
+            // framing so the reframe drag begins somewhere useful.
+            setSlot(id, { ref: 1, s: clampS(this._viewA.s * 1.6), r: 1,
+              x: this._viewA.x, y: this._viewA.y });
+            this._closeTwo();
+            this._enterReframe2();
+            return;
+          }
+          if (act === 'two-reframe') { this._closeTwo(); this._enterReframe2(); return; }
+          if (act === 'two-remove') {
+            const id = this._secondId();
+            this._swapTo(false);
+            if (id) setSlot(id, null);
+            this._closeTwo();
+            return;
+          }
+          return;
+        }
         if (act === 'adjust' || act === 'adj-done' || act === 'look-copy' ||
             act === 'look-paste' || act === 'adj-reset' || act === 'look-eye') {
           this._disarm();
@@ -789,6 +996,7 @@
       // naturalWidth/Height aren't known until load — re-apply so the cover
       // baseline is computed from real dimensions, not the 100%×100% fallback.
       this._img.addEventListener('load', () => this._applyView());
+      this._imgB.addEventListener('load', () => this._applyView());
       // An author src= that fails to load (file not baked yet) must fall back
       // to the empty placeholder, not a broken-image tile.
       this._img.addEventListener('error', () => {
@@ -832,7 +1040,8 @@
           // Single-axis stretch anchored at the OPPOSITE edge. Horizontal
           // drags move s (and compensate r so the height holds still);
           // vertical drags move r alone.
-          const iw = this._img.naturalWidth || 1, ih = this._img.naturalHeight || 1;
+          const tImg = this._t2 ? this._imgB : this._img;
+          const iw = tImg.naturalWidth || 1, ih = tImg.naturalHeight || 1;
           const contain = (this.getAttribute('fit') || 'cover').toLowerCase() === 'contain';
           const base = contain ? Math.min(fw / iw, fh / ih) : Math.max(fw / iw, fh / ih);
           const s0 = this._view.s, r0 = this._view.r;
@@ -863,7 +1072,8 @@
           // Resize about the OPPOSITE corner. Viewport-px throughout (rect
           // fw/fh, not clientWidth) so the math survives a transform:scale()
           // ancestor — deck_stage renders slides scaled-to-fit.
-          const iw = this._img.naturalWidth || 1, ih = this._img.naturalHeight || 1;
+          const tImg = this._t2 ? this._imgB : this._img;
+          const iw = tImg.naturalWidth || 1, ih = tImg.naturalHeight || 1;
           const contain = (this.getAttribute('fit') || 'cover').toLowerCase() === 'contain';
           const base = contain ? Math.min(fw / iw, fh / ih) : Math.max(fw / iw, fh / ih);
           const sx = corner.includes('e') ? 1 : -1;
@@ -954,6 +1164,25 @@
       // frame's clamp range.
       this._ro = new ResizeObserver(() => this._render());
       this._ro.observe(this);
+      // Hover swap on pointer devices. swap-scope names an ancestor (the
+      // whole card) so hovering the caption counts too. Hovering the
+      // control strip suppresses the swap, otherwise the image fades out
+      // from under the cursor on the way to Replace/Edit.
+      if (canHover() && !this._hoverOn) {
+        this._hoverOn = true;
+        this._onSwapIn = () => this._swapTo(true);
+        this._onSwapOut = () => this._swapTo(false);
+        this._hoverScopeEl = this._swapScope();
+        this._hoverScopeEl.addEventListener('pointerenter', this._onSwapIn);
+        this._hoverScopeEl.addEventListener('pointerleave', this._onSwapOut);
+        this._ctlIn = () => { this._ctlHover = true; this._swapTo(false); };
+        this._ctlOut = () => {
+          this._ctlHover = false;
+          if (this.matches(':hover')) this._swapTo(true);
+        };
+        this._ctl.addEventListener('pointerenter', this._ctlIn);
+        this._ctl.addEventListener('pointerleave', this._ctlOut);
+      }
       load();
       this._render();
     }
@@ -966,6 +1195,15 @@
       this.removeEventListener('dragleave', this);
       this.removeEventListener('drop', this);
       if (this._ro) { this._ro.disconnect(); this._ro = null; }
+      clearTimeout(this._holdT);
+      registerSwap(this, false);
+      if (this._hoverOn) {
+        this._hoverOn = false;
+        this._hoverScopeEl.removeEventListener('pointerenter', this._onSwapIn);
+        this._hoverScopeEl.removeEventListener('pointerleave', this._onSwapOut);
+        this._ctl.removeEventListener('pointerenter', this._ctlIn);
+        this._ctl.removeEventListener('pointerleave', this._ctlOut);
+      }
       // commit=false: a disconnect is not a user intent — committing here
       // would persist whatever half-finished drag a React remount or DOM
       // splice happened to interrupt. Deliberate exits commit on their own
@@ -973,9 +1211,157 @@
       this._exitReframe(false);
     }
 
+    // The reframe machinery (pan, resize, wheel, clamp) is written against
+    // this._view. Aliasing it to whichever image is being edited lets image
+    // 2 reuse all of it unchanged.
+    get _view() { return this._t2 ? this._view2 : this._viewA; }
+    set _view(v) { if (this._t2) this._view2 = v; else this._viewA = v; }
+
+    // Image 2 lives in the sidecar under its own key, so it persists, bakes
+    // and undoes exactly like image 1.
+    _secondId() { return this.id ? this.id + '-b' : null; }
+
+    _enterReframe2() {
+      if (!this.hasAttribute('data-second')) return;
+      this._t2 = true;
+      this.setAttribute('data-swap-on', '');   // edit what you can see
+      this._enterReframe();
+    }
+
+    _swapBlocked() {
+      return this.hasAttribute('data-reframe') || this.hasAttribute('data-adjust') ||
+        this.hasAttribute('data-two') || !!this._ctlHover;
+    }
+
+    _swapTo(on) {
+      if (!this.hasAttribute('data-second')) return;
+      if (on && this._swapBlocked()) return;
+      if (!on) clearTimeout(this._holdT);
+      this.toggleAttribute('data-swap-on', !!on);
+    }
+
+    // Touch path: fade in, hold, fade back. Re-armed every time the slot
+    // re-enters the centered band.
+    _scrollTrigger() {
+      if (!this.hasAttribute('data-second') || this._swapBlocked()) return;
+      clearTimeout(this._holdT);
+      this._swapTo(true);
+      const back = reducedMotion() ? SWAP_HOLD : SWAP_FADE + SWAP_HOLD;
+      this._holdT = setTimeout(() => this._swapTo(false), back);
+    }
+
+    _swapScope() {
+      const sel = this.getAttribute('swap-scope');
+      let el = null;
+      if (sel) { try { el = this.closest(sel); } catch (e) {} }
+      return el || this;
+    }
+
+    _openTwo() {
+      if (!this.hasAttribute('data-filled')) return;
+      this._exitReframe(true);
+      this._closeAdjust();
+      this.setAttribute('data-two', '');
+      this._swapTo(false);
+      this._syncTwoUI();
+      try { this._twoPanel.showPopover(); } catch (e) {}
+      try { this._ctl.showPopover(); } catch (e) {}
+      this._positionPanel(this._twoPanel);
+      this._twoWatch = () => {
+        if (!this.hasAttribute('data-two')) return;
+        this._positionPanel(this._twoPanel);
+        this._twoWatchId = requestAnimationFrame(this._twoWatch);
+      };
+      this._twoWatchId = requestAnimationFrame(this._twoWatch);
+      this._twoOutside = (e) => {
+        if (e.composedPath && e.composedPath().includes(this)) return;
+        this._closeTwo();
+      };
+      this._twoEsc = (e) => { if (e.key === 'Escape') this._closeTwo(); };
+      document.addEventListener('pointerdown', this._twoOutside, true);
+      document.addEventListener('keydown', this._twoEsc, true);
+    }
+
+    _closeTwo() {
+      if (!this.hasAttribute('data-two')) return;
+      this.removeAttribute('data-two');
+      if (this._twoOutside) document.removeEventListener('pointerdown', this._twoOutside, true);
+      if (this._twoEsc) document.removeEventListener('keydown', this._twoEsc, true);
+      this._twoOutside = this._twoEsc = null;
+      if (this._twoWatchId) { cancelAnimationFrame(this._twoWatchId); this._twoWatchId = 0; }
+      try { this._twoPanel.hidePopover(); } catch (e) {}
+      if (!this.hasAttribute('data-reframe')) {
+        try { this._ctl.hidePopover(); } catch (e) {}
+        this._ctl.style.left = ''; this._ctl.style.top = '';
+      }
+    }
+
+    _syncTwoUI() {
+      const p = this._twoPanel;
+      if (!p) return;
+      const id = this._secondId();
+      const st = id ? getSlot(id) : null;
+      const has = this.hasAttribute('data-second');
+      const ref = !!(st && st.ref);
+      p.querySelector('.hint').textContent = has
+        ? (ref ? 'Image 2 \u2014 zoom of image 1' : 'Image 2 \u2014 uploaded photo')
+        : 'No second image yet';
+      const set = (act, show, label) => {
+        const b = p.querySelector('[data-act="' + act + '"]');
+        if (!b) return;
+        b.style.display = show ? '' : 'none';
+        if (label) b.textContent = label;
+      };
+      set('two-upload', true, has && !ref ? 'Replace the upload\u2026' : 'Upload a photo\u2026');
+      set('two-zoom', true, ref ? 'Reset the zoom' : 'Use a zoom of image 1');
+      set('two-reframe', has);
+      set('two-remove', has);
+      const btn = this._ctl.querySelector('button[data-act="two"]');
+      if (btn) btn.toggleAttribute('data-on', has);
+    }
+
+    _renderSecond() {
+      const enabled = this.hasAttribute('swap');
+      const id = enabled ? this._secondId() : null;
+      const st = id ? getSlot(id) : null;
+      let u = '';
+      if (st && !st.cleared) {
+        // ref:1 = a zoomed crop of image 1, so it borrows image 1's bytes.
+        if (st.ref) u = this._img.getAttribute('src') || '';
+        else if (st.u && (/^data:image\//i.test(st.u) ||
+          /^(?:\.\/)?images\/[\w.-]+$/i.test(st.u))) u = st.u;
+      }
+      const has = !!(u && this.hasAttribute('data-filled'));
+      if (!(this._t2 && this.hasAttribute('data-reframe'))) {
+        this._view2 = {
+          s: st && Number.isFinite(st.s) ? clampS(st.s) : 1,
+          r: st && Number.isFinite(st.r) && st.r > 0 ? st.r : 1,
+          x: st && Number.isFinite(st.x) ? st.x : 0,
+          y: st && Number.isFinite(st.y) ? st.y : 0,
+        };
+      }
+      if (has) {
+        if (this._imgB.getAttribute('src') !== u) this._imgB.src = u;
+        this._imgB.style.display = 'block';
+        this._imgB.style.filter = this._img.style.filter;
+        this.setAttribute('data-second', '');
+        this._layout(this._imgB, this._view2);
+      } else {
+        this._imgB.style.display = 'none';
+        this._imgB.removeAttribute('src');
+        this.removeAttribute('data-second');
+        this.removeAttribute('data-swap-on');
+      }
+      registerSwap(this, has);
+      if (this.hasAttribute('data-two')) this._syncTwoUI();
+    }
+
     _enterReframe() {
       if (this.hasAttribute('data-reframe')) return;
       this.setAttribute('data-reframe', '');
+      const tImg = this._t2 ? this._imgB : this._img;
+      this._ghost.src = tImg.getAttribute('src') || '';
+      this._ghost.style.filter = tImg.style.filter;
       this._signalReframe(true);
       // Best-effort commit when the document unloads mid-reframe (a host
       // navigation racing the enter signal, a manual reload, tab close):
@@ -1041,6 +1427,11 @@
       try { this._ctl.hidePopover(); } catch {}
       this._ctl.style.left = ''; this._ctl.style.top = '';
       if (commit) this._commitView();
+      if (this._t2) {
+        this._t2 = false;
+        this.removeAttribute('data-swap-on');
+        this._ghost.src = this._img.getAttribute('src') || '';
+      }
       this._signalReframe(false);
     }
 
@@ -1080,6 +1471,8 @@
       this._local = null;
       const hi = this.getAttribute('hires-target');
       if (hi) setSlot(hi, null);
+      const bId = this._secondId();
+      if (bId && getSlot(bId)) setSlot(bId, null);
       // With an author src= in the HTML, deleting the entry would just fall
       // back to that image — record an explicit cleared marker instead.
       const authored = (this.getAttribute('src') || '').trim();
@@ -1112,6 +1505,8 @@
     }
 
     async _ingest(file) {
+      const to2 = !!this._ingestTo2;
+      this._ingestTo2 = false;
       this._setError(null);
       if (!file || ACCEPT.indexOf(file.type) < 0) {
         this._setError('Drop a PNG, JPEG, WebP, or AVIF image.');
@@ -1125,6 +1520,13 @@
         const w = this.clientWidth || this.offsetWidth || MAX_DIM;
         const url = await toDataUrl(file, w);
         if (gen !== this._gen) return;
+        // Image 2 is display-only (no lightbox, no hi-res companion) and
+        // must not disturb image 1 or its crop.
+        if (to2) {
+          const bId = this._secondId();
+          if (bId) setSlot(bId, { u: url, s: 1, x: 0, y: 0 });
+          return;
+        }
         // Only exit reframe once the new image is in hand — a rejected type
         // or decode failure leaves the in-progress crop untouched.
         this._exitReframe(false);
@@ -1178,8 +1580,9 @@
     // box — ResizeObserver fires with a 0×0 rect under display:none, and
     // clamping against a degenerate 1×1 frame would silently pull the stored
     // pan toward zero.
-    _geom() {
-      const iw = this._img.naturalWidth, ih = this._img.naturalHeight;
+    _geom(img) {
+      const im = img || (this._t2 ? this._imgB : this._img);
+      const iw = im.naturalWidth, ih = im.naturalHeight;
       const fw = this.clientWidth, fh = this.clientHeight;
       if (!iw || !ih || !fw || !fh) return null;
       const contain = (this.getAttribute('fit') || 'cover').toLowerCase() === 'contain';
@@ -1200,65 +1603,70 @@
     }
 
     _applyView() {
-      const g = this._geom();
       // Top-layer controls: pin to the frame's top-right in viewport px
       // (the same 8px inset as the in-frame layout; unscaled — top-layer UI
-      // reads as chrome, not page content). BEFORE the geometry branch:
-      // placement needs only the frame rect, and a not-yet-loaded or broken
-      // src must not leave the promoted strip floating unpositioned. Gated
-      // on the popover actually being open: without the Popover API,
-      // showPopover() threw (swallowed in _enterReframe), .ctl stays in
-      // its in-frame absolute layout, and viewport-px coordinates would
-      // shove it off-frame — and matches(':popover-open') itself throws
-      // there (unknown pseudo-class), hence the try/catch.
+      // reads as chrome, not page content). BEFORE any geometry: placement
+      // needs only the frame rect, and a not-yet-loaded or broken src must
+      // not leave the promoted strip floating unpositioned. Gated on the
+      // popover actually being open: without the Popover API, showPopover()
+      // threw (swallowed in _enterReframe), .ctl stays in its in-frame
+      // absolute layout, and viewport-px coordinates would shove it
+      // off-frame — and matches(':popover-open') itself throws there
+      // (unknown pseudo-class), hence the try/catch.
       if (this.hasAttribute('data-reframe')) {
         let onTop = false;
-        try { onTop = this._ctl.matches(':popover-open'); } catch {}
+        try { onTop = this._ctl.matches(':popover-open'); } catch (e) {}
         if (onTop) {
           const r = this.getBoundingClientRect();
           this._ctl.style.left = (r.right - 8) + 'px';
           this._ctl.style.top = (r.top + 8) + 'px';
         }
       }
+      this._layout(this._img, this._viewA);
+      if (this._imgB && this._imgB.getAttribute('src')) this._layout(this._imgB, this._view2);
+      if (!this.hasAttribute('data-reframe')) return;
+      // Top-layer spill: position in viewport px over the frame. The top
+      // layer escapes ancestor transforms entirely, so EVERY term must be
+      // in viewport units: getBoundingClientRect gives the frame's scaled
+      // origin AND size, and the rect/layout ratio rescales the ghost —
+      // sizing from layout px alone renders it 1/scale too large under a
+      // scaled deck slide. Inner ghost + handles stay box-relative.
+      const g = this._geom();
+      if (!g) return;
+      const v = this._view;
+      const k = g.base * v.s, ky = k * v.r;
+      const r = this.getBoundingClientRect();
+      const sx = g.fw ? r.width / g.fw : 1;
+      const sy = g.fh ? r.height / g.fh : 1;
+      this._spill.style.width = (g.iw * k * sx) + 'px';
+      this._spill.style.height = (g.ih * ky * sy) + 'px';
+      this._spill.style.left = (r.left + (50 + v.x) / 100 * r.width) + 'px';
+      this._spill.style.top = (r.top + (50 + v.y) / 100 * r.height) + 'px';
+    }
+
+    // Place ONE image inside the frame from its own crop. Width/height and
+    // left/top are all frame-% — they depend only on the frame aspect, so a
+    // responsive resize keeps the same crop. Baseline (cover-fill or
+    // contain-fit) × view scale.
+    _layout(img, view) {
+      const contain = (this.getAttribute('fit') || 'cover').toLowerCase() === 'contain';
+      const g = this._geom(img);
       if (!g) {
         // Dimensions not known yet (before img load) — centered fit so there
         // is no flash of an unpositioned image before the geometry lands.
-        const contain = (this.getAttribute('fit') || 'cover').toLowerCase() === 'contain';
-        this._img.style.width = '100%';
-        this._img.style.height = '100%';
-        this._img.style.left = '50%';
-        this._img.style.top = '50%';
-        this._img.style.objectFit = contain ? 'contain' : 'cover';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.left = '50%';
+        img.style.top = '50%';
+        img.style.objectFit = contain ? 'contain' : 'cover';
         return;
       }
-      // Baseline (cover-fill or contain-fit) × view scale. Width/height and
-      // left/top are all frame-% — depends only on the frame aspect ratio, so
-      // a responsive resize keeps the same crop. The spill layer mirrors the
-      // same box so its corners = image corners.
-      const k = g.base * this._view.s;
-      const ky = k * this._view.r;
-      const w = (g.iw * k / g.fw * 100) + '%';
-      const h = (g.ih * ky / g.fh * 100) + '%';
-      const l = (50 + this._view.x) + '%';
-      const t = (50 + this._view.y) + '%';
-      this._img.style.width = w; this._img.style.height = h;
-      this._img.style.left = l; this._img.style.top = t;
-      this._img.style.objectFit = '';
-      if (this.hasAttribute('data-reframe')) {
-        // Top-layer spill: position in viewport px over the frame. The top
-        // layer escapes ancestor transforms entirely, so EVERY term must be
-        // in viewport units: getBoundingClientRect gives the frame's scaled
-        // origin AND size, and the rect/layout ratio rescales the ghost —
-        // sizing from layout px alone renders it 1/scale too large under a
-        // scaled deck slide. Inner ghost + handles stay box-relative.
-        const r = this.getBoundingClientRect();
-        const sx = g.fw ? r.width / g.fw : 1;
-        const sy = g.fh ? r.height / g.fh : 1;
-        this._spill.style.width = (g.iw * k * sx) + 'px';
-        this._spill.style.height = (g.ih * ky * sy) + 'px';
-        this._spill.style.left = (r.left + (50 + this._view.x) / 100 * r.width) + 'px';
-        this._spill.style.top = (r.top + (50 + this._view.y) / 100 * r.height) + 'px';
-      }
+      const k = g.base * view.s, ky = k * view.r;
+      img.style.width = (g.iw * k / g.fw * 100) + '%';
+      img.style.height = (g.ih * ky / g.fh * 100) + '%';
+      img.style.left = (50 + view.x) + '%';
+      img.style.top = (50 + view.y) + '%';
+      img.style.objectFit = '';
     }
 
     // ── Adjust mode ───────────────────────────────────────────────────
@@ -1301,15 +1709,17 @@
     }
 
     // Under the frame, nudged back inside the viewport if it would overflow.
-    _positionAdj() {
+    _positionAdj() { this._positionPanel(this._adjPanel); }
+
+    _positionPanel(panel) {
       const r = this.getBoundingClientRect();
-      const w = this._adjPanel.offsetWidth || 236;
-      const h = this._adjPanel.offsetHeight || 220;
+      const w = panel.offsetWidth || 236;
+      const h = panel.offsetHeight || 220;
       let left = Math.min(r.left, window.innerWidth - w - 8);
       let top = r.bottom + 8;
       if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 8);
-      this._adjPanel.style.left = Math.max(8, left) + 'px';
-      this._adjPanel.style.top = top + 'px';
+      panel.style.left = Math.max(8, left) + 'px';
+      panel.style.top = top + 'px';
       // Keep the hover controls pinned to the frame while the panel is open.
       this._ctl.style.left = (r.right - 8) + 'px';
       this._ctl.style.top = (r.top + 8) + 'px';
@@ -1356,6 +1766,7 @@
     }
 
     _commitView() {
+      if (this._t2) return this._commitSecond();
       const v = { s: this._view.s, x: this._view.x, y: this._view.y };
       if (this._view.r !== 1) v.r = this._view.r;
       if (this._adj) v.a = this._adj;
@@ -1364,6 +1775,18 @@
       // crop; clearing the sidecar still falls through to src=.
       if (this.id) setSlot(this.id, v);
       else { this._local = v; }
+    }
+
+    // Image 2's entry carries its own crop and either its own bytes or a
+    // ref back to image 1's.
+    _commitSecond() {
+      const id = this._secondId();
+      if (!id) return;
+      const prev = getSlot(id) || {};
+      const v = { s: this._view2.s, x: this._view2.x, y: this._view2.y };
+      if (this._view2.r !== 1) v.r = this._view2.r;
+      if (prev.ref) v.ref = 1; else if (prev.u) v.u = prev.u;
+      setSlot(id, v);
     }
 
     _render() {
@@ -1461,6 +1884,8 @@
         this.removeAttribute('data-filled');
       }
 
+      this._renderSecond();
+
       // Credit belongs to the author src, so a user drop hides it.
       // textContent + the http(s)-only funnel keep external strings inert.
       const showCredit = !!(url && credit && !this._userUrl && !attrError);
@@ -1509,6 +1934,168 @@
     }
   }
 
+  // ── Global undo / redo ───────────────────────────────────────────────
+  // Photoshop-style history over the shared sidecar: every non-quiet write
+  // (drop, replace, remove, reframe, adjust) records {id, prev, next}, so a
+  // step can be walked backwards AND forwards. Quiet writes (persist:false)
+  // are arrange-images.js's staged reorders — they keep their own Save/Revert.
+  // Editor-only chrome: nothing renders on the published site.
+  const undoStack = [];
+  const redoStack = [];
+  const HIST_MAX = 50;
+  let applying = false;
+  let histBar = null, bUndo = null, bRedo = null, histLabel = null;
+
+  const cloneVal = (v) => (v && typeof v === 'object' ? JSON.parse(JSON.stringify(v)) : v);
+  const sameVal = (a, b) => JSON.stringify(a === undefined ? null : a) ===
+    JSON.stringify(b === undefined ? null : b);
+
+  // A step is a GROUP of slot changes applied together, so a rearrange that
+  // moves eight images is one undo — not eight. quiet:true steps stage in
+  // memory only (arrange's staged order, persisted by its own Save order).
+  function pushStep(items, opts) {
+    if (applying) return false;        // undo/redo application is not a new step
+    const list = (items || [])
+      .filter((it) => it && it.id && !sameVal(it.prev, it.next))
+      .map((it) => ({ id: it.id, prev: cloneVal(it.prev), next: cloneVal(it.next) }));
+    if (!list.length) return false;
+    undoStack.push({ items: list, quiet: !!(opts && opts.quiet), label: (opts && opts.label) || '' });
+    if (undoStack.length > HIST_MAX) undoStack.shift();
+    redoStack.length = 0;              // a fresh edit forks the future
+    renderHist();
+    return true;
+  }
+
+  const pushUndo = (id, prevVal, nextVal) => pushStep([{ id, prev: prevVal, next: nextVal }]);
+
+  function applyStep(step, dir) {
+    applying = true;
+    try {
+      step.items.forEach((it) => {
+        const val = dir === 'prev' ? it.prev : it.next;
+        if (val !== undefined) { slots[it.id] = cloneVal(val); tombstones.delete(it.id); }
+        else { delete slots[it.id]; if (!loaded) tombstones.add(it.id); }
+      });
+      subs.forEach((fn) => fn());
+      if (!step.quiet) { if (loaded) save(); else load().then(save); }
+    } finally { applying = false; }
+    if (step.quiet) {
+      document.dispatchEvent(new CustomEvent('image-slots:history', {
+        detail: { dir, label: step.label }
+      }));
+    }
+  }
+
+  function undo() {
+    const e = undoStack.pop();
+    if (!e) return false;
+    redoStack.push(e);
+    applyStep(e, 'prev');
+    renderHist();
+    return true;
+  }
+
+  function redo() {
+    const e = redoStack.pop();
+    if (!e) return false;
+    undoStack.push(e);
+    applyStep(e, 'next');
+    renderHist();
+    return true;
+  }
+
+  // Host adoption: the page's own toolbar (arrange-images.js's bar) can take
+  // the Undo/Redo controls in, so there is one set of controls, not two.
+  let histMounted = false;
+  function mountHistory(host) {
+    ensureHistBar();
+    if (!host || !bUndo) return false;
+    histMounted = true;
+    if (histBar) histBar.style.display = 'none';
+    bUndo.style.borderLeft = '1px solid #D6CFC2';
+    host.appendChild(bUndo);
+    host.appendChild(bRedo);
+    host.appendChild(histLabel);
+    renderHist();
+    return true;
+  }
+
+  const editableNow = () => !!(window.omelette && window.omelette.writeFile);
+
+  function ensureHistBar() {
+    if (histBar || !document.body) return;
+    const bar = document.createElement('div');
+    bar.setAttribute('data-image-slot-history', '');
+    bar.style.cssText = 'position:fixed;left:18px;bottom:calc(18px + env(safe-area-inset-bottom));' +
+      'z-index:99997;display:none;align-items:stretch;background:#EDEAE3;border:1px solid #1B1917;' +
+      'box-shadow:0 12px 30px rgba(27,25,23,.22)';
+    const mk = (label, title, fn) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.title = title;
+      b.textContent = label;
+      b.style.cssText = 'appearance:none;border:0;border-left:1px solid #D6CFC2;background:transparent;' +
+        "font:600 10px 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.12em;" +
+        'text-transform:uppercase;padding:10px 14px;cursor:pointer;color:#1B1917;white-space:nowrap';
+      b.addEventListener('mouseenter', () => { if (!b.disabled) b.style.color = '#A34A24'; });
+      b.addEventListener('mouseleave', () => { if (!b.disabled) b.style.color = '#1B1917'; });
+      b.addEventListener('click', fn);
+      bar.appendChild(b);
+      return b;
+    };
+    bUndo = mk('\u21B6 Undo', 'Undo the last image change (\u2318Z)', () => undo());
+    bUndo.style.borderLeft = '0';
+    bRedo = mk('\u21B7 Redo', 'Redo (\u21E7\u2318Z)', () => redo());
+    histLabel = document.createElement('span');
+    histLabel.style.cssText = 'display:flex;align-items:center;padding:0 13px;border-left:1px solid #D6CFC2;' +
+      "font:400 10px 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.06em;color:#5C564C;white-space:nowrap";
+    bar.appendChild(histLabel);
+    document.body.appendChild(bar);
+    histBar = bar;
+  }
+
+  function renderHist() {
+    if (!editableNow()) { if (histBar) histBar.style.display = 'none'; return; }
+    ensureHistBar();
+    if (!histBar) return;
+    const u = undoStack.length, r = redoStack.length;
+    // Always visible in the editor, even with an empty history — a bar that
+    // appears and vanishes is impossible to find when you need it. Once a
+    // page toolbar has adopted the controls, its own bar stays hidden.
+    histBar.style.display = histMounted ? 'none' : 'flex';
+    const set = (b, n) => {
+      b.disabled = !n;
+      b.style.opacity = n ? '1' : '.32';
+      b.style.cursor = n ? 'pointer' : 'default';
+      if (!n) b.style.color = '#1B1917';
+    };
+    set(bUndo, u);
+    set(bRedo, r);
+    histLabel.textContent = (u || r) ? (u + ' back \u00B7 ' + r + ' forward') : 'No image changes yet';
+  }
+
+  subs.add(renderHist);
+  document.addEventListener('keydown', (e) => {
+    if (!(e.metaKey || e.ctrlKey) || !editableNow()) return;
+    const k = (e.key || '').toLowerCase();
+    if (k !== 'z' && k !== 'y') return;
+    const t = e.target;
+    // Never steal the shortcut from a text field / the editor's own text undo.
+    if (t && (t.isContentEditable || /^(input|textarea|select)$/i.test(t.tagName || ''))) return;
+    if (!undoStack.length && !redoStack.length) return;
+    e.preventDefault();
+    if (k === 'y' || e.shiftKey) redo(); else undo();
+  }, true);
+
+  const bootHist = () => {
+    ensureHistBar();
+    renderHist();
+    let tries = 0;
+    const iv = setInterval(() => { renderHist(); if (editableNow() || ++tries > 60) clearInterval(iv); }, 400);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootHist);
+  else bootHist();
+
   // Page-level store API. Lets a page stage changes across many slots (e.g.
   // drag-to-rearrange) in memory and persist them on an explicit user action.
   // set/replaceAll persist by default; pass {persist:false} to stage only.
@@ -1523,6 +2110,12 @@
       if (!(opts && opts.persist === false)) save();
     },
     commit: () => save(),
+    undo: () => undo(),
+    redo: () => redo(),
+    pushStep: (items, opts) => pushStep(items, opts),
+    mountHistory: (host) => mountHistory(host),
+    canUndo: () => undoStack.length > 0,
+    canRedo: () => redoStack.length > 0,
     // CSS filter value for a slot's saved look — pages apply it to their own
     // <img> (lightbox, hero crossfade) so the look travels with the image.
     filter: (id) => { const v = getSlot(id); return adjFilter(id, v && v.a); },

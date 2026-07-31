@@ -125,6 +125,8 @@
     hint.style.cssText = 'display:flex;align-items:center;padding:0 14px;border-left:1px solid ' + LINE +
       ';font:400 10px \'IBM Plex Mono\',monospace;letter-spacing:.06em;color:' + MUTED + ';white-space:nowrap';
     bar.appendChild(hint);
+    // One toolbar: pull the shared Undo/Redo controls in beside these.
+    if (store().mountHistory) store().mountHistory(bar);
 
     bArrange.addEventListener('click', () => setOn(!on));
     bSave.addEventListener('click', () => {
@@ -266,7 +268,16 @@
     if (to === from || to < 0) return;
     if (swap) { const t = vals[to]; vals[to] = vals[from]; vals[from] = t; }
     else { vals.splice(to, 0, vals.splice(from, 1)[0]); }
+    const before = store().all();
     writeAll(els, vals);
+    if (store().pushStep) {
+      const after = store().all();
+      const ids = new Set(Object.keys(before).concat(Object.keys(after)));
+      store().pushStep(
+        Array.from(ids).map((id) => ({ id, prev: before[id], next: after[id] })),
+        { quiet: true, label: swap ? 'trade' : 'move' }
+      );
+    }
     dirty = true;
     flash(swap ? 'Traded — press Save order' : 'Moved — press Save order');
     render();
@@ -289,6 +300,20 @@
       s.parentElement.removeAttribute('data-ai-src');
     });
     drag = null;
+  }
+
+  /* ---------- staged history ---------- */
+
+  // Undo/redo of a staged reorder changes the pending order without writing
+  // disk, so the bar must keep offering Save order / Revert (or drop them
+  // once we are back at the loaded order).
+  function watchHistory() {
+    document.addEventListener('image-slots:history', () => {
+      if (!base) return;
+      dirty = JSON.stringify(store().all()) !== JSON.stringify(base);
+      flash(dirty ? 'Order changed — press Save order' : 'Back to saved order');
+      render();
+    });
   }
 
   /* ---------- touch long-press ---------- */
@@ -324,6 +349,7 @@
     buildBar();
     render();
     touchPress();
+    watchHistory();
     new MutationObserver(() => { if (on) mountHandles(); })
       .observe(document.body, { childList: true, subtree: true });
     window.addEventListener('beforeunload', (e) => {

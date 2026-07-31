@@ -99,7 +99,7 @@
     <div class="m-grid-3" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px">
       <sc-for list="{{ works }}" as="w" hint-placeholder-count="9">
         <div onClick="{{ w.onOpen }}" class="m-press" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="{{ w.slot }}" src="{{ w.src }}" shape="rect" placeholder="{{ w.placeholder }}"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="{{ w.slot }}" src="{{ w.src }}" hires-target="{{ w.fullSlot }}" hires-maxdim="2400" shape="rect" placeholder="{{ w.placeholder }}"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">{{ w.no }}</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">{{ w.collection }}</span>
