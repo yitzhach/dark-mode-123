@@ -537,6 +537,10 @@
         // this gate a keyboard user could drive them on a read-only share
         // link (mirrors the dblclick handler's editable gate).
         if (!this.hasAttribute('data-editable')) return;
+        // These live in the shadow root, so the click would otherwise bubble
+        // (composed) into the card and open the page's lightbox.
+        e.preventDefault();
+        e.stopPropagation();
         if (act === 'replace') {
           this._exitReframe(true);
           // Host-owned picker (Unsplash modal; it also offers local import).
@@ -818,7 +822,10 @@
       this._local = null;
       const hi = this.getAttribute('hires-target');
       if (hi) setSlot(hi, null);
-      if (this.id) setSlot(this.id, null);
+      // With an author src= in the HTML, deleting the entry would just fall
+      // back to that image — record an explicit cleared marker instead.
+      const authored = (this.getAttribute('src') || '').trim();
+      if (this.id) setSlot(this.id, authored ? { cleared: 1 } : null);
       else this._render();
     }
 
@@ -1033,10 +1040,15 @@
       // data:image/ URLs from it. The `src` attribute is author-controlled
       // (Claude wrote it into the HTML) so it passes through unchanged.
       let stored = this.id ? getSlot(this.id) : this._local;
-      if (stored && stored.u && !/^data:image\//i.test(stored.u)) stored = null;
+      // Relative project paths are allowed too: the arrange tool stages a
+      // reorder by moving each slot's effective image (often "images/<id>.webp")
+      // through the sidecar. Absolute/remote URLs are still rejected.
+      if (stored && stored.u && !/^data:image\//i.test(stored.u) &&
+          !/^(?:\.\/)?images\/[\w.-]+$/i.test(stored.u)) stored = null;
       const srcAttr = this.getAttribute('src') || '';
       this._userUrl = (stored && stored.u) || null;
-      const url = this._userUrl || (srcAttr === this._badSrc ? '' : srcAttr);
+      const cleared = !!(stored && stored.cleared && !this._userUrl);
+      const url = this._userUrl || (cleared || srcAttr === this._badSrc ? '' : srcAttr);
       // Don't clobber an in-flight reframe with a store-triggered re-render.
       if (!this.hasAttribute('data-reframe')) {
         this._view = {

@@ -37,13 +37,30 @@
   const visibleSlots = () => Array.from(document.querySelectorAll('image-slot[id]'))
     .filter((el) => el.offsetWidth > 4 && el.offsetHeight > 4);
 
+  // The effective image of a slot is its sidecar entry when that carries a
+  // URL, otherwise the author src= baked into the HTML. Arrange has to move
+  // that effective image, not just the sidecar entry, or baked slots look
+  // unchanged after a drop.
+  const eff = (el) => {
+    const st = store().get(el.id);
+    if (st && st.u) return st;
+    if (st && st.cleared) return null;
+    const src = el.getAttribute && el.getAttribute('src');
+    if (!src) return null;
+    return Object.assign({}, st || {}, { u: src });
+  };
+
   const readAll = (els) => els.map((el) => {
     const h = el.getAttribute('hires-target');
-    return { main: store().get(el.id), hi: h ? store().get(h) : undefined };
+    const hEl = h ? document.getElementById(h) || document.querySelector('image-slot[id="' + h + '"]') : null;
+    return { main: eff(el), hi: h ? (hEl ? eff(hEl) : store().get(h)) : undefined };
   });
 
   const writeAll = (els, vals) => els.forEach((el, i) => {
-    store().set(el.id, vals[i].main, { persist: false });
+    // An emptied slot that still has an author src= needs the cleared marker,
+    // otherwise it falls back to its baked image and the move looks like a copy.
+    const authored = (el.getAttribute('src') || '').trim();
+    store().set(el.id, vals[i].main || (authored ? { cleared: 1 } : null), { persist: false });
     const h = el.getAttribute('hires-target');
     if (h && vals[i].hi !== undefined) store().set(h, vals[i].hi, { persist: false });
   });
