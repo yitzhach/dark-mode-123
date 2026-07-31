@@ -164,7 +164,7 @@
     <p style="font:400 16px/1.65 'Archivo',sans-serif;color:#4A443C;max-width:560px;margin:0 0 48px;text-wrap:pretty">Site-specific work, framed by project type — for the specifier who needs to picture the piece in a space.</p>
     <div class="m-grid-3" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px">
       <div data-glow="" class="m-press" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease;overflow:hidden" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-        <div class="m-card-img" style="height:300px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="insitu-lobby" shape="rect" placeholder="In-situ — lobby installation" style="width: 363px; height: 307px" src="images/insitu-lobby.webp"></image-slot></div>
+        <div class="m-card-img" style="height:300px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2;cursor:pointer" onClick="{{ navImages }}" onDoubleClick="{{ navCancel }}"><image-slot id="insitu-lobby" shape="rect" placeholder="In-situ — lobby installation" style="width: 363px; height: 307px" src="images/insitu-lobby.webp"></image-slot></div>
         <a href="gallery.html" style="padding:22px 24px 24px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;color:#1B1917">
           <div>
             <div style="font:400 22px 'Newsreader',serif;margin:0 0 5px">Images</div>
@@ -174,7 +174,7 @@
         </a>
       </div>
       <div data-glow="" class="m-press" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease;overflow:hidden" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-        <div class="m-card-img" style="height:300px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="insitu-hospitality" shape="rect" placeholder="In-situ — hospitality" src="images/insitu-hospitality.webp"></image-slot></div>
+        <div class="m-card-img" style="height:300px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2;cursor:pointer" onClick="{{ navWorks }}" onDoubleClick="{{ navCancel }}"><image-slot id="insitu-hospitality" shape="rect" placeholder="In-situ — hospitality" src="images/insitu-hospitality.webp"></image-slot></div>
         <a href="#works" style="padding:22px 24px 24px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;color:#1B1917">
           <div>
             <div style="font:400 22px 'Newsreader',serif;margin:0 0 5px">Collections</div>
@@ -184,7 +184,7 @@
         </a>
       </div>
       <div data-glow="" class="m-press" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease;overflow:hidden" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-        <div class="m-card-img" style="height:300px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="insitu-collection" shape="rect" placeholder="In-situ — private collection" src="images/insitu-collection.webp"></image-slot></div>
+        <div class="m-card-img" style="height:300px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2;cursor:pointer" onClick="{{ navInquire }}" onDoubleClick="{{ navCancel }}"><image-slot id="insitu-collection" shape="rect" placeholder="In-situ — private collection" src="images/insitu-collection.webp"></image-slot></div>
         <a href="#inquire" style="padding:22px 24px 24px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;color:#1B1917">
           <div>
             <div style="font:400 22px 'Newsreader',serif;margin:0 0 5px">Commissions</div>
@@ -304,7 +304,7 @@
   <footer data-screen-label="Footer" style="border-top:1px solid #D6CFC2">
     <div class="m-pad m-footer" style="max-width:1240px;margin:0 auto;padding:30px 48px;box-sizing:border-box;display:flex;justify-content:space-between;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
       <span>© {{ copyrightYear }} Isaac Anderson Art</span>
-      <span data-build-stamp="1" style="opacity:.55;letter-spacing:.06em">v2026.07.30.2</span>
+      <span data-build-stamp="1" style="opacity:.55;letter-spacing:.06em">v2026.07.30.3</span>
     </div>
   </footer>
 
@@ -433,8 +433,25 @@ class Component extends DCLogic {
       onEnter: () => this.setState({ hovered: p.no }),
       onLeave: () => this.setState({ hovered: null }),
     }));
+    const slotNav = (href) => (e) => {
+      // Ignore clicks that belong to image-slot's own chrome (Replace/Edit/✕,
+      // empty-state browse, reframe drag) so editing still works.
+      const path = e.nativeEvent && e.nativeEvent.composedPath ? e.nativeEvent.composedPath() : [];
+      for (const n of path) {
+        if (!n || !n.classList) continue;
+        if (n.getAttribute && n.getAttribute('data-act')) return;
+        if (n.classList.contains('ctl') || n.classList.contains('empty') || n.classList.contains('spill')) return;
+      }
+      if (e.detail > 1) return; // double-click = reframe, not navigation
+      this._navT = setTimeout(() => { window.location.href = href; }, 200);
+    };
+    const slotNavCancel = () => clearTimeout(this._navT);
     return {
       pieces,
+      navImages: slotNav('gallery.html'),
+      navWorks: slotNav('#works'),
+      navInquire: slotNav('#inquire'),
+      navCancel: slotNavCancel,
       copyrightYear: new Date().getFullYear(),
       navShadow: this.state.scrolled ? '0 10px 32px rgba(27,25,23,.10)' : 'none',
       navOpen: this.state.navOpen,
