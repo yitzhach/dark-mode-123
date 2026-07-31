@@ -227,7 +227,10 @@
   }
 
   const S_MAX = 5;
-  const clampS = (s) => Math.max(1, Math.min(S_MAX, s));
+  // S_MIN < 1 lets an image sit SMALLER than its frame (letterboxed) — needed
+  // so the edge handles can squeeze an axis, not only stretch it outward.
+  const S_MIN = 0.1;
+  const clampS = (s) => Math.max(S_MIN, Math.min(S_MAX, s));
 
   // Normalize a stored slot value. Pre-reframe sidecars stored a bare
   // data-URL string; newer ones store {u, s, x, y}. Either shape is valid.
@@ -278,6 +281,114 @@
     }
   }
 
+  // ── Adjustments ("look") ────────────────────────────────────────────────
+  // A look is a small map of integer slider values persisted alongside the
+  // crop under key `a`. It renders live through ONE SVG filter per slot:
+  // exact channel math (warmth is an R/B gain, which no CSS filter can
+  // express) and cheap to bake later — the same numbers drive a canvas pass
+  // at /deploy, after which `a` is dropped and the pixels carry the look.
+  const ADJ_UI = [
+    ['c', 'Contrast', -100, 100], ['b', 'Brightness', -100, 100],
+    ['s', 'Saturation', -100, 100], ['w', 'Warmth', -100, 100],
+    ['t', 'Tint', -100, 100],
+    ['f', 'Fade', 0, 100], ['sh', 'Sharpen', 0, 100],
+  ];
+  const ADJ_KEYS = ADJ_UI.map((r) => r[0]).concat('bw');
+  const adjClean = (a) => {
+    if (!a || typeof a !== 'object') return null;
+    const out = {};
+    ADJ_UI.forEach(([k, , lo, hi]) => {
+      const n = Math.round(Number(a[k]));
+      if (Number.isFinite(n) && n) out[k] = Math.max(lo, Math.min(hi, n));
+    });
+    if (a.bw) out.bw = 1;
+    return Object.keys(out).length ? out : null;
+  };
+  // Cross-slot "copy look / paste look" clipboard (session-scoped).
+  let lookClip = null;
+  let filterSvg = null;
+  function filterHost() {
+    if (filterSvg && filterSvg.isConnected) return filterSvg;
+    filterSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    filterSvg.setAttribute('aria-hidden', 'true');
+    filterSvg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+    document.body.appendChild(filterSvg);
+    return filterSvg;
+  }
+  // Build/refresh the slot's filter chain; returns a CSS filter value ('' = none).
+  // Filter defs live in the LIGHT dom so url(#id) resolves for shadow-dom
+  // images, page lightboxes and export captures alike.
+  // Shadow-DOM images can't reach light-DOM filter defs (url(#id) resolves
+  // inside the shadow tree), so each slot also keeps its own defs svg and we
+  // build the chain twice: once per shadow root, once in the document for the
+  // page lightbox and export captures.
+  function shadowFilterHost(root) {
+    let svg = root.querySelector('svg[data-look-defs]');
+    if (svg) return svg;
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('data-look-defs', '');
+    svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+    root.appendChild(svg);
+    return svg;
+  }
+  function adjFilter(key, raw, root) {
+    const a = adjClean(raw);
+    const id = 'is-look-' + String(key || 'x').replace(/[^\w-]/g, '_');
+    const old = root ? root.getElementById(id) : document.getElementById(id);
+    if (!a) { if (old) old.remove(); return ''; }
+    const NS = 'http://www.w3.org/2000/svg';
+    const fl = old || document.createElementNS(NS, 'filter');
+    fl.setAttribute('id', id);
+    fl.setAttribute('color-interpolation-filters', 'sRGB');
+    while (fl.firstChild) fl.removeChild(fl.firstChild);
+    const add = (tag, attrs) => {
+      const el = document.createElementNS(NS, tag);
+      Object.keys(attrs).forEach((k) => el.setAttribute(k, attrs[k]));
+      fl.appendChild(el);
+      return el;
+    };
+    if (a.bw) add('feColorMatrix', { type: 'saturate', values: '0' });
+    else if (a.s) add('feColorMatrix', { type: 'saturate', values: String(1 + a.s / 100) });
+    if (a.w) {
+      const g = a.w / 100 * 0.22;
+      add('feColorMatrix', { type: 'matrix', values: [
+        1 + g, 0, 0, 0, 0, 0, 1 + g * 0.10, 0, 0, 0, 0, 0, 1 - g, 0, 0, 0, 0, 0, 1, 0,
+      ].join(' ') });
+    }
+    // Tint runs the other colour axis: green (−) to magenta (+), i.e. green
+    // gain against equal red/blue gain, so it stays independent of warmth.
+    if (a.t) {
+      const m = a.t / 100 * 0.16;
+      add('feColorMatrix', { type: 'matrix', values: [
+        1 + m * 0.6, 0, 0, 0, 0, 0, 1 - m, 0, 0, 0, 0, 0, 1 + m * 0.6, 0, 0, 0, 0, 0, 1, 0,
+      ].join(' ') });
+    }
+    // Contrast pivots on mid-grey; brightness shifts; fade lifts the black
+    // point — all three collapse into one linear transfer per channel.
+    const c = 1 + (a.c || 0) / 100 * 0.8;
+    let slope = c, intercept = 0.5 - 0.5 * c + (a.b || 0) / 100 * 0.25;
+    if (a.f) { const L = a.f / 100 * 0.16; slope *= (1 - L); intercept = intercept * (1 - L) + L; }
+    if (slope !== 1 || intercept !== 0) {
+      const ct = document.createElementNS(NS, 'feComponentTransfer');
+      ['feFuncR', 'feFuncG', 'feFuncB'].forEach((t) => {
+        const fn = document.createElementNS(NS, t);
+        fn.setAttribute('type', 'linear');
+        fn.setAttribute('slope', String(slope));
+        fn.setAttribute('intercept', String(intercept));
+        ct.appendChild(fn);
+      });
+      fl.appendChild(ct);
+    }
+    if (a.sh) {
+      const k = a.sh / 100 * 0.9;
+      add('feConvolveMatrix', { order: '3', preserveAlpha: 'true',
+        kernelMatrix: [0, -k, 0, -k, 1 + 4 * k, -k, 0, -k, 0].join(' ') });
+    }
+    if (!old) (root ? shadowFilterHost(root) : filterHost()).appendChild(fl);
+    return 'url(#' + id + ')';
+  }
+
   // ── Custom element ──────────────────────────────────────────────────────
   const stylesheet =
     // Fill the container by default: slots are usually placed inside a
@@ -322,6 +433,14 @@
     '.spill .handle[data-c=ne]{left:100%;top:0;cursor:nesw-resize}' +
     '.spill .handle[data-c=sw]{left:0;top:100%;cursor:nesw-resize}' +
     '.spill .handle[data-c=se]{left:100%;top:100%;cursor:nwse-resize}' +
+    // Mid-edge handles stretch ONE axis (aspect distorts); slightly
+    // squarer than the round corner handles so the two read as different
+    // tools. Double-click any of them resets the stretch.
+    '.spill .handle[data-e]{border-radius:2px;width:14px;height:8px}' +
+    '.spill .handle[data-e=n]{left:50%;top:0;cursor:ns-resize}' +
+    '.spill .handle[data-e=s]{left:50%;top:100%;cursor:ns-resize}' +
+    '.spill .handle[data-e=w]{left:0;top:50%;cursor:ew-resize;width:8px;height:14px}' +
+    '.spill .handle[data-e=e]{left:100%;top:50%;cursor:ew-resize;width:8px;height:14px}' +
     ':host([data-reframe]){z-index:10}' +
     ':host([data-reframe]) .frame{box-shadow:0 0 0 2px #c96442}' +
     '.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;' +
@@ -360,7 +479,8 @@
     // right-aligns against the computed left edge); inset:auto clears the
     // base rule's top/right so the inline left/top position it alone.
     '.ctl:popover-open{position:fixed;inset:auto;transform:translateX(-100%)}' +
-    ':host([data-filled][data-editable]:hover) .ctl,:host([data-reframe]) .ctl' +
+    ':host([data-filled][data-editable]:hover) .ctl,:host([data-reframe]) .ctl,' +
+    ':host([data-adjust]) .ctl' +
     '  {opacity:1;pointer-events:auto}' +
     '.ctl button{appearance:none;border:0;border-radius:6px;padding:5px 10px;cursor:pointer;' +
     '  background:rgba(0,0,0,.65);color:#fff;font:11px/1 system-ui,-apple-system,sans-serif;' +
@@ -368,6 +488,31 @@
     '.ctl button:hover{background:rgba(0,0,0,.8)}' +
     // Remove: an ✕ box, two-step (click arms, second click clears) so a
     // stray click can't discard a dropped image.
+    // Adjust panel: floats under the frame in the top layer (no reflow of
+    // the grid behind it). Same dark-glass chrome vocabulary as .ctl.
+    '.adj{position:fixed;margin:0;inset:auto;border:0;padding:10px 12px 8px;z-index:12;' +
+    '  width:236px;border-radius:10px;background:rgba(20,18,16,.88);backdrop-filter:blur(8px);' +
+    '  color:#F5F3EE;font:11px/1.3 system-ui,-apple-system,sans-serif;' +
+    '  box-shadow:0 10px 30px rgba(0,0,0,.35);display:none}' +
+    '.adj:popover-open{display:block}' +
+    '.adj .arow{display:grid;grid-template-columns:62px 1fr 28px;align-items:center;gap:8px;' +
+    '  margin-bottom:6px}' +
+    '.adj .arow span:last-child{text-align:right;font:10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;' +
+    '  opacity:.7;font-variant-numeric:tabular-nums}' +
+    '.adj input[type=range]{width:100%;accent-color:#c96442;height:14px;margin:0}' +
+    '.adj .bwrow{display:flex;align-items:center;gap:8px;margin:8px 0 2px}' +
+    '.adj input[type=checkbox]{accent-color:#c96442;margin:0}' +
+    '.adj .abtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;padding-top:9px;' +
+    '  border-top:1px solid rgba(255,255,255,.14)}' +
+    '.adj button{appearance:none;border:0;border-radius:6px;padding:5px 9px;cursor:pointer;' +
+    '  font:11px/1 system-ui,-apple-system,sans-serif;background:rgba(255,255,255,.14);color:#F5F3EE}' +
+    '.adj button:hover{background:rgba(255,255,255,.26)}' +
+    '.adj button[data-act="adj-done"]{margin-left:auto;background:#c96442;color:#fff}' +
+    '.adj button[data-act="look-eye"]{min-width:34px}' +
+    '.adj button[data-act="look-eye"][data-on]{background:rgba(255,255,255,.30);color:#fff}' +
+    '.ctl button[data-act="adjust"][data-on]{background:#c96442;color:#fff}' +
+    '.ctl button[data-act="reset"]{display:none}' +
+    ':host([data-reframe]) .ctl button[data-act="reset"]{display:inline-block}' +
     '.ctl button[data-act="remove"]{padding:5px 8px;font-size:12px;line-height:1}' +
     '.ctl button[data-act="remove"][data-armed]{background:#a3341a;padding:5px 10px;font-size:11px}' +
     '.err{position:absolute;left:8px;bottom:8px;right:8px;color:#b3261e;font-size:11px;' +
@@ -497,6 +642,8 @@
         '  <img class="ghost" alt="" draggable="false">' +
         '  <div class="handle" data-c="nw"></div><div class="handle" data-c="ne"></div>' +
         '  <div class="handle" data-c="sw"></div><div class="handle" data-c="se"></div>' +
+        '  <div class="handle" data-e="n"></div><div class="handle" data-e="s"></div>' +
+        '  <div class="handle" data-e="w"></div><div class="handle" data-e="e"></div>' +
         '</div>' +
         // data-dc-edit-transparent: the DC editor's edit-mode picker lets
         // clicks through for chrome marked with it (EDIT_TRANSPARENT_SEL)
@@ -504,8 +651,48 @@
         // element selection and the controls look dead.
         '<div class="ctl" popover="manual" data-dc-edit-transparent><button data-act="replace" title="Replace image">Replace</button>' +
         '  <button data-act="edit" title="Reframe image">Edit</button>' +
+        '  <button data-act="adjust" title="Adjust contrast, colour and tone">Adjust</button>' +
+        '  <button data-act="reset" title="Reset size, stretch and position">Reset</button>' +
         '  <button data-act="remove" title="Remove image">✕</button></div>' +
         '<input type="file" accept="' + ACCEPT.join(',') + '" hidden>';
+      // Built here rather than in the template string so the slider rows
+      // stay data-driven off ADJ_UI.
+      const adj = document.createElement('div');
+      adj.className = 'adj';
+      adj.setAttribute('popover', 'manual');
+      adj.setAttribute('data-dc-edit-transparent', '');
+      adj.innerHTML = ADJ_UI.map(([k, label, lo, hi]) =>
+        '<label class="arow"><span>' + label + '</span>' +
+        '<input type="range" data-adj="' + k + '" min="' + lo + '" max="' + hi + '" step="1" value="0">' +
+        '<span data-out="' + k + '">0</span></label>').join('') +
+        '<label class="bwrow"><input type="checkbox" data-adj="bw"><span>Black &amp; white</span></label>' +
+        '<div class="abtns"><button data-act="look-eye" title="Preview without adjustments">Off</button>' +
+        '<button data-act="look-copy" title="Copy this look">Copy</button>' +
+        '<button data-act="look-paste" title="Paste the copied look">Paste</button>' +
+        '<button data-act="adj-reset" title="Clear all adjustments">Reset</button>' +
+        '<button data-act="adj-done">Done</button></div>';
+      root.appendChild(adj);
+      // Swallow stray interactions so the page's lightbox doesn't open — but
+      // let clicks on the panel's own buttons through to the data-act handler
+      // on the shadow root (that handler stops propagation itself).
+      ['pointerdown', 'click', 'dblclick'].forEach((t) =>
+        adj.addEventListener(t, (e) => {
+          const el = e.target;
+          if (t === 'click' && el && el.closest && el.closest('[data-act]')) return;
+          e.stopPropagation();
+        }));
+      this._adjPanel = adj;
+      this._adj = null;
+      adj.addEventListener('input', (e) => {
+        const key = e.target.getAttribute && e.target.getAttribute('data-adj');
+        if (!key) return;
+        const next = Object.assign({}, this._adj);
+        next[key] = key === 'bw' ? (e.target.checked ? 1 : 0) : Number(e.target.value);
+        this._adj = adjClean(next);
+        this._syncAdjUI();
+        this._applyAdj();
+        this._commitAdj();
+      });
       this._frame = root.querySelector('.frame');
       this._ring = root.querySelector('.ring');
       this._img = root.querySelector('.frame img');
@@ -525,7 +712,7 @@
       this._input = root.querySelector('input');
       this._depth = 0;
       this._gen = 0;
-      this._view = { s: 1, x: 0, y: 0 };
+      this._view = { s: 1, r: 1, x: 0, y: 0 };
       this._subFn = () => this._render();
       // Shadow-DOM listeners live with the shadow DOM — bound once here so
       // disconnect/reconnect (e.g. React remount) doesn't stack handlers.
@@ -559,6 +746,34 @@
           }
           return;
         }
+        if (act === 'reset') {
+          this._disarm();
+          this._view.s = 1; this._view.r = 1; this._view.x = 0; this._view.y = 0;
+          this._applyView();
+          this._commitView();
+          return;
+        }
+        if (act === 'adjust' || act === 'adj-done' || act === 'look-copy' ||
+            act === 'look-paste' || act === 'adj-reset' || act === 'look-eye') {
+          this._disarm();
+          if (act === 'look-eye') {
+            this._adjOff = !this._adjOff;
+            this._syncAdjUI(); this._applyAdj();
+            return;
+          }
+          if (act === 'adjust') { if (this.hasAttribute('data-adjust')) this._closeAdjust(); else this._openAdjust(); }
+          if (act === 'adj-done') this._closeAdjust();
+          if (act === 'look-copy') lookClip = this._adj ? Object.assign({}, this._adj) : null;
+          if (act === 'look-paste') {
+            this._adj = adjClean(lookClip);
+            this._syncAdjUI(); this._applyAdj(); this._commitAdj();
+          }
+          if (act === 'adj-reset') {
+            this._adj = null;
+            this._syncAdjUI(); this._applyAdj(); this._commitAdj();
+          }
+          return;
+        }
         this._disarm();
         if (act === 'edit') {
           if (!this._reframes()) return;
@@ -582,6 +797,17 @@
       });
       // Gated only on editable — any filled slot can be repositioned/scaled,
       // regardless of fit. Share links (no writeFile) stay static.
+      // Double-click an edge handle: undo the stretch (keep scale + pan).
+      this._spill.addEventListener('dblclick', (e) => {
+        if (!(e.target.getAttribute && e.target.getAttribute('data-e'))) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (this._view.r === 1) return;
+        this._view.r = 1;
+        this._clampView();
+        this._applyView();
+        this._commitView();
+      });
       this.addEventListener('dblclick', (e) => {
         if (!this.hasAttribute('data-editable') || !this._reframes()) return;
         e.preventDefault();
@@ -600,8 +826,40 @@
         const rect = this.getBoundingClientRect();
         const fw = rect.width || 1, fh = rect.height || 1;
         const corner = e.target.getAttribute && e.target.getAttribute('data-c');
+        const edge = e.target.getAttribute && e.target.getAttribute('data-e');
         let move;
-        if (corner) {
+        if (edge) {
+          // Single-axis stretch anchored at the OPPOSITE edge. Horizontal
+          // drags move s (and compensate r so the height holds still);
+          // vertical drags move r alone.
+          const iw = this._img.naturalWidth || 1, ih = this._img.naturalHeight || 1;
+          const contain = (this.getAttribute('fit') || 'cover').toLowerCase() === 'contain';
+          const base = contain ? Math.min(fw / iw, fh / ih) : Math.max(fw / iw, fh / ih);
+          const s0 = this._view.s, r0 = this._view.r;
+          const w0 = iw * base * s0, h0 = ih * base * s0 * r0;
+          const cx0 = (50 + this._view.x) / 100 * fw;
+          const cy0 = (50 + this._view.y) / 100 * fh;
+          const horiz = edge === 'e' || edge === 'w';
+          const sgn = (edge === 'e' || edge === 's') ? 1 : -1;
+          const ox = horiz ? cx0 - sgn * w0 / 2 : cy0 - sgn * h0 / 2;
+          const d0 = horiz ? w0 : h0;
+          move = (ev) => {
+            const p = horiz ? (ev.clientX - rect.left) : (ev.clientY - rect.top);
+            const d = Math.max(1, sgn * (p - ox));
+            if (horiz) {
+              const s = clampS(s0 * d / d0);
+              this._view.s = s;
+              this._view.r = clampS(s0 * r0) / s;
+              this._view.x = (ox + sgn * (d0 * s / s0) / 2) / fw * 100 - 50;
+            } else {
+              const sv = clampS(s0 * r0 * d / d0);
+              this._view.r = sv / s0;
+              this._view.y = (ox + sgn * (d0 * sv / (s0 * r0)) / 2) / fh * 100 - 50;
+            }
+            this._clampView();
+            this._applyView();
+          };
+        } else if (corner) {
           // Resize about the OPPOSITE corner. Viewport-px throughout (rect
           // fw/fh, not clientWidth) so the math survives a transform:scale()
           // ancestor — deck_stage renders slides scaled-to-fit.
@@ -611,7 +869,7 @@
           const sx = corner.includes('e') ? 1 : -1;
           const sy = corner.includes('s') ? 1 : -1;
           const s0 = this._view.s;
-          const w0 = iw * base * s0, h0 = ih * base * s0;
+          const w0 = iw * base * s0, h0 = ih * base * s0 * this._view.r;
           const cx0 = (50 + this._view.x) / 100 * fw;
           const cy0 = (50 + this._view.y) / 100 * fh;
           const ox = cx0 - sx * w0 / 2, oy = cy0 - sy * h0 / 2;
@@ -935,8 +1193,8 @@
       // Pan range on each axis is half the overflow past the frame edge.
       const g = this._geom();
       if (!g) return;
-      const mx = Math.max(0, (g.iw * g.base * this._view.s / g.fw - 1) * 50);
-      const my = Math.max(0, (g.ih * g.base * this._view.s / g.fh - 1) * 50);
+      const mx = Math.abs(g.iw * g.base * this._view.s / g.fw - 1) * 50;
+      const my = Math.abs(g.ih * g.base * this._view.s * this._view.r / g.fh - 1) * 50;
       this._view.x = Math.max(-mx, Math.min(mx, this._view.x));
       this._view.y = Math.max(-my, Math.min(my, this._view.y));
     }
@@ -978,8 +1236,9 @@
       // a responsive resize keeps the same crop. The spill layer mirrors the
       // same box so its corners = image corners.
       const k = g.base * this._view.s;
+      const ky = k * this._view.r;
       const w = (g.iw * k / g.fw * 100) + '%';
-      const h = (g.ih * k / g.fh * 100) + '%';
+      const h = (g.ih * ky / g.fh * 100) + '%';
       const l = (50 + this._view.x) + '%';
       const t = (50 + this._view.y) + '%';
       this._img.style.width = w; this._img.style.height = h;
@@ -996,14 +1255,110 @@
         const sx = g.fw ? r.width / g.fw : 1;
         const sy = g.fh ? r.height / g.fh : 1;
         this._spill.style.width = (g.iw * k * sx) + 'px';
-        this._spill.style.height = (g.ih * k * sy) + 'px';
+        this._spill.style.height = (g.ih * ky * sy) + 'px';
         this._spill.style.left = (r.left + (50 + this._view.x) / 100 * r.width) + 'px';
         this._spill.style.top = (r.top + (50 + this._view.y) / 100 * r.height) + 'px';
       }
     }
 
+    // ── Adjust mode ───────────────────────────────────────────────────
+    _openAdjust() {
+      if (!this.hasAttribute('data-filled')) return;
+      this._exitReframe(true);
+      this.setAttribute('data-adjust', '');
+      this._syncAdjUI();
+      try { this._adjPanel.showPopover(); } catch {}
+      try { this._ctl.showPopover(); } catch {}
+      this._positionAdj();
+      this._adjWatch = () => {
+        if (!this.hasAttribute('data-adjust')) return;
+        this._positionAdj();
+        this._adjWatchId = requestAnimationFrame(this._adjWatch);
+      };
+      this._adjWatchId = requestAnimationFrame(this._adjWatch);
+      this._adjOutside = (e) => {
+        if (e.composedPath && e.composedPath().includes(this)) return;
+        this._closeAdjust();
+      };
+      this._adjEsc = (e) => { if (e.key === 'Escape') this._closeAdjust(); };
+      document.addEventListener('pointerdown', this._adjOutside, true);
+      document.addEventListener('keydown', this._adjEsc, true);
+    }
+
+    _closeAdjust() {
+      if (!this.hasAttribute('data-adjust')) return;
+      this.removeAttribute('data-adjust');
+      // Leaving adjust mode always returns to the real, adjusted view.
+      if (this._adjOff) { this._adjOff = false; this._applyAdj(); }
+      if (this._adjOutside) document.removeEventListener('pointerdown', this._adjOutside, true);
+      if (this._adjEsc) document.removeEventListener('keydown', this._adjEsc, true);
+      this._adjOutside = this._adjEsc = null;
+      if (this._adjWatchId) { cancelAnimationFrame(this._adjWatchId); this._adjWatchId = 0; }
+      try { this._adjPanel.hidePopover(); } catch {}
+      try { this._ctl.hidePopover(); } catch {}
+      this._ctl.style.left = ''; this._ctl.style.top = '';
+      this._commitAdj();
+    }
+
+    // Under the frame, nudged back inside the viewport if it would overflow.
+    _positionAdj() {
+      const r = this.getBoundingClientRect();
+      const w = this._adjPanel.offsetWidth || 236;
+      const h = this._adjPanel.offsetHeight || 220;
+      let left = Math.min(r.left, window.innerWidth - w - 8);
+      let top = r.bottom + 8;
+      if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 8);
+      this._adjPanel.style.left = Math.max(8, left) + 'px';
+      this._adjPanel.style.top = top + 'px';
+      // Keep the hover controls pinned to the frame while the panel is open.
+      this._ctl.style.left = (r.right - 8) + 'px';
+      this._ctl.style.top = (r.top + 8) + 'px';
+    }
+
+    _syncAdjUI() {
+      const a = this._adj || {};
+      this._adjPanel.querySelectorAll('[data-adj]').forEach((el) => {
+        const k = el.getAttribute('data-adj');
+        if (k === 'bw') el.checked = !!a.bw;
+        else {
+          el.value = String(a[k] || 0);
+          const out = this._adjPanel.querySelector('[data-out="' + k + '"]');
+          if (out) out.textContent = String(a[k] || 0);
+        }
+      });
+      const btn = this._ctl.querySelector('button[data-act="adjust"]');
+      if (btn) btn.toggleAttribute('data-on', !!this._adj);
+      // Bypass is a view state, not an edit: it never touches `a`, so the
+      // sliders stay where they are and Done still saves the look.
+      const eye = this._adjPanel.querySelector('button[data-act="look-eye"]');
+      if (eye) {
+        eye.textContent = this._adjOff ? 'Off' : 'On';
+        eye.toggleAttribute('data-on', !this._adjOff);
+        eye.title = this._adjOff ? 'Showing original \u2014 click to apply adjustments'
+          : 'Showing adjustments \u2014 click to compare with the original';
+      }
+    }
+
+    _applyAdj() {
+      const key = this.id || 'anon';
+      const live = this._adjOff ? null : this._adj;
+      const css = adjFilter(key, live, this.shadowRoot);
+      adjFilter(key, live); // light-DOM twin for lightbox / export
+      this._img.style.filter = css;
+      this._ghost.style.filter = css;
+    }
+
+    // Adjustments ride in the same sidecar entry as the crop, so a look
+    // survives reload and follows the id into the Gallery and lightbox.
+    _commitAdj() {
+      clearTimeout(this._adjT);
+      this._adjT = setTimeout(() => this._commitView(), 160);
+    }
+
     _commitView() {
       const v = { s: this._view.s, x: this._view.x, y: this._view.y };
+      if (this._view.r !== 1) v.r = this._view.r;
+      if (this._adj) v.a = this._adj;
       if (this._userUrl) v.u = this._userUrl;
       // Framing-only (no u) persists too so an author-src slot remembers its
       // crop; clearing the sidecar still falls through to src=.
@@ -1053,10 +1408,16 @@
       if (!this.hasAttribute('data-reframe')) {
         this._view = {
           s: stored && Number.isFinite(stored.s) ? clampS(stored.s) : 1,
+          r: stored && Number.isFinite(stored.r) && stored.r > 0 ? stored.r : 1,
           x: stored && Number.isFinite(stored.x) ? stored.x : 0,
           y: stored && Number.isFinite(stored.y) ? stored.y : 0,
         };
       }
+      if (!this.hasAttribute('data-adjust')) {
+        this._adj = adjClean(stored && stored.a);
+        if (this._adjPanel) this._syncAdjUI();
+      }
+      this._applyAdj();
       this._cap.textContent = this.getAttribute('placeholder') || 'Drop an image';
       // Toggle via style.display — the [hidden] attribute alone loses to
       // the display:flex / display:block rules in the stylesheet above.
@@ -1162,6 +1523,9 @@
       if (!(opts && opts.persist === false)) save();
     },
     commit: () => save(),
+    // CSS filter value for a slot's saved look — pages apply it to their own
+    // <img> (lightbox, hero crossfade) so the look travels with the image.
+    filter: (id) => { const v = getSlot(id); return adjFilter(id, v && v.a); },
   };
 
   if (!customElements.get('image-slot')) {

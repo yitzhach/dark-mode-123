@@ -275,12 +275,15 @@ class Component extends DCLogic {
     if (this.getSlotUrl(slotId)) this.setState({ lightboxIndex: i });
   }
 
-  buildLightboxImg(url, alt, maxW, maxH) {
+  buildLightboxImg(url, alt, maxW, maxH, slotId) {
     if (!url) return null;
+    // Saved look (Adjust panel) travels with the slot id into the lightbox.
+    const look = (slotId && window.ImageSlots && window.ImageSlots.filter)
+      ? window.ImageSlots.filter(slotId) : '';
     return React.createElement('img', {
       src: url, alt,
       onClick: (e) => e.stopPropagation(),
-      style: { maxWidth: maxW, maxHeight: maxH, width: 'auto', height: 'auto', objectFit: 'contain', boxShadow: '0 40px 100px rgba(0,0,0,.5)' },
+      style: { maxWidth: maxW, maxHeight: maxH, width: 'auto', height: 'auto', objectFit: 'contain', filter: look || 'none', boxShadow: '0 40px 100px rgba(0,0,0,.5)' },
     });
   }
 
@@ -313,7 +316,7 @@ class Component extends DCLogic {
       topPointer: this.state.topVisible ? 'auto' : 'none',
       scrollTop: () => window.scrollTo({ top: 0, behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches) ? 'auto' : 'smooth' }),
       lightboxOpen,
-      lightboxImg: this.buildLightboxImg(lightboxOpen ? (this.getSlotUrl(works[idx].fullSlot) || this.getSlotUrl(works[idx].slot)) : null, lightboxOpen ? works[idx].no : '', '92vw', '90vh'),
+      lightboxImg: this.buildLightboxImg(lightboxOpen ? (this.getSlotUrl(works[idx].fullSlot) || this.getSlotUrl(works[idx].slot)) : null, lightboxOpen ? works[idx].no : '', '92vw', '90vh', lightboxOpen ? works[idx].slot : null),
       lightboxCap: lightboxOpen ? works[idx].no : '',
       lightboxPos: lightboxOpen ? (idx + 1) : 0,
       closeLightbox: () => this.setState({ lightboxIndex: null }),
