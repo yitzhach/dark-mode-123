@@ -113,10 +113,10 @@
     </a>
     <button type="button" onClick="{{ toggleNav }}" aria-label="Menu" aria-expanded="{{ navOpen }}" class="m-burger" style="display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:44px;height:44px;background:none;border:none;cursor:pointer;padding:0"><span style="display:block;width:24px;height:2px;background:#1B1917"></span><span style="display:block;width:24px;height:2px;background:#1B1917"></span><span style="display:block;width:24px;height:2px;background:#1B1917"></span></button>
     <div class="m-navlinks {{ navOpenCls }}" onClick="{{ closeNav }}" style="display:flex;align-items:center;gap:38px">
-      <a href="#commissions" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">01</span>Commissions</a>
+      <a href="commissions.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">01</span>Commissions</a>
       <a href="#works" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">02</span>Works</a>
-      <span aria-disabled="true" title="Coming soon" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;color:#5C564C;padding:6px 0;cursor:default"><span style="font:500 10px 'IBM Plex Mono',monospace;margin-right:6px">03</span>Process</span>
-      <span aria-disabled="true" title="Coming soon" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;color:#5C564C;padding:6px 0;cursor:default"><span style="font:500 10px 'IBM Plex Mono',monospace;margin-right:6px">04</span>About</span>
+      <a href="process.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">03</span>Process</a>
+      <a href="about.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">04</span>About</a>
       <a href="#inquire" style="background:var(--accent,#A34A24);color:#F5F3EE;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:13px 26px;transition:background .25s ease" style-hover="background:#1B1917;color:#F5F3EE">Inquire</a>
     </div>
   </nav>
@@ -140,7 +140,7 @@
 
   <!-- HERO IMAGE (full bleed, parallax) -->
   <div id="hero-parallax" data-screen-label="Hero image" class="m-hero-img" style="position:relative;height:600px;max-width:1240px;margin:0 auto;overflow:hidden;min-width:0;animation:rise .9s .2s cubic-bezier(.2,.7,.2,1) both;box-shadow:inset 0 1px 0 rgba(27,25,23,.08),inset 0 -1px 0 rgba(27,25,23,.08)">
-    <div style="position:absolute;inset:-60px 0 -60px 0"><image-slot id="hero-macro" shape="rect" loading="eager" placeholder="Macro texture — erosion surface, figure for scale"></image-slot></div>
+    <div style="position:absolute;inset:-60px 0 -60px 0"><image-slot id="hero-macro" swap shape="rect" loading="eager" placeholder="Macro texture — erosion surface, figure for scale" src="images/hero-macro.webp"></image-slot></div>
     
     <div class="m-capR" style="position:absolute;top:28px;right:48px;pointer-events:none;font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;color:#F5F3EE;background:rgba(27,25,23,.62);backdrop-filter:blur(4px);padding:9px 14px">/01</div>
     <div style="position:absolute;bottom:0;left:0;right:0;height:80px;pointer-events:none;background:linear-gradient(to top,rgba(27,25,23,.18),transparent)"></div>
@@ -164,8 +164,8 @@
     <p style="font:400 16px/1.65 'Archivo',sans-serif;color:#4A443C;max-width:560px;margin:0 0 48px;text-wrap:pretty">Site-specific work, framed by project type — for the specifier who needs to picture the piece in a space.</p>
     <div class="m-grid-3" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px">
       <div data-glow="" class="m-press" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease;overflow:hidden" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-        <div class="m-card-img" style="height:300px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="insitu-lobby" shape="rect" placeholder="In-situ — lobby installation" style="width: 363px; height: 307px"></image-slot></div>
-        <a href="#inquire" style="padding:22px 24px 24px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;color:#1B1917">
+        <div class="m-card-img" style="height:300px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2;cursor:pointer" onClick="{{ navImages }}" onDoubleClick="{{ navCancel }}"><image-slot id="insitu-lobby" swap shape="rect" placeholder="In-situ — lobby installation" style="width: 363px; height: 307px" src="images/insitu-lobby.webp"></image-slot></div>
+        <a href="gallery.html" style="padding:22px 24px 24px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;color:#1B1917">
           <div>
             <div style="font:400 22px 'Newsreader',serif;margin:0 0 5px">Images</div>
             <div style="font:400 13px 'Archivo',sans-serif;color:#5C564C">Residential + commercial</div>
@@ -174,8 +174,8 @@
         </a>
       </div>
       <div data-glow="" class="m-press" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease;overflow:hidden" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-        <div class="m-card-img" style="height:300px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="insitu-hospitality" shape="rect" placeholder="In-situ — hospitality"></image-slot></div>
-        <a href="#inquire" style="padding:22px 24px 24px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;color:#1B1917">
+        <div class="m-card-img" style="height:300px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2;cursor:pointer" onClick="{{ navWorks }}" onDoubleClick="{{ navCancel }}"><image-slot id="insitu-hospitality" swap shape="rect" placeholder="In-situ — hospitality" src="images/insitu-hospitality.webp"></image-slot></div>
+        <a href="#works" style="padding:22px 24px 24px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;color:#1B1917">
           <div>
             <div style="font:400 22px 'Newsreader',serif;margin:0 0 5px">Collections</div>
             <div style="font:400 13px 'Archivo',sans-serif;color:#5C564C">Homes + Commercial</div>
@@ -184,7 +184,7 @@
         </a>
       </div>
       <div data-glow="" class="m-press" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease;overflow:hidden" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-        <div class="m-card-img" style="height:300px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="insitu-collection" shape="rect" placeholder="In-situ — private collection"></image-slot></div>
+        <div class="m-card-img" style="height:300px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2;cursor:pointer" onClick="{{ navInquire }}" onDoubleClick="{{ navCancel }}"><image-slot id="insitu-collection" swap shape="rect" placeholder="In-situ — private collection" src="images/insitu-collection.webp"></image-slot></div>
         <a href="#inquire" style="padding:22px 24px 24px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;color:#1B1917">
           <div>
             <div style="font:400 22px 'Newsreader',serif;margin:0 0 5px">Commissions</div>
@@ -217,18 +217,20 @@
       <p style="font:400 14px/1.6 'Archivo',sans-serif;color:#A29B8E;margin:0 0 40px">A partial index. Each piece carries a one-page spec sheet — dimensions, materials, install notes.</p>
       <sc-for list="{{ pieces }}" as="p" hint-placeholder-count="3">
         <div onMouseEnter="{{ p.onEnter }}" onMouseLeave="{{ p.onLeave }}" class="m-work-row" style="display:flex;align-items:center;gap:28px;padding:22px 0 22px 0;border-top:1px solid #37332E;transition:padding-left .35s cubic-bezier(.2,.7,.2,1)" style-hover="padding-left:14px">
-          <div class="m-thumb" style="width:72px;height:72px;flex:none;opacity:{{ p.thumbOp }};transition:opacity .35s ease;min-width:0;overflow:hidden">
-            <image-slot id="{{ p.slot }}" shape="rect" placeholder="thumb"></image-slot>
-          </div>
-          <a href="{{ p.href }}" onFocus="{{ p.onEnter }}" onBlur="{{ p.onLeave }}" class="m-work-link" style="flex:1;min-width:0;color:#EDEAE3;display:flex;align-items:baseline" style-hover="color:#EDEAE3" style-focus="outline:2px solid var(--accent,#A34A24);outline-offset:4px">
-            <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:18px;flex:none">{{ p.no }}</span>
-            <span style="font:400 24px 'Newsreader',serif;letter-spacing:-.01em">{{ p.name }}</span>
+          <a href="{{ p.href }}" onFocus="{{ p.onEnter }}" onBlur="{{ p.onLeave }}" class="m-work-link" style="flex:1;min-width:0;color:#EDEAE3;display:flex;align-items:center;gap:28px" style-hover="color:#EDEAE3" style-focus="outline:2px solid var(--accent,#A34A24);outline-offset:4px">
+            <div class="m-thumb" style="width:72px;height:72px;flex:none;opacity:{{ p.thumbOp }};transition:opacity .35s ease;min-width:0;overflow:hidden">
+              <image-slot id="{{ p.slot }}" src="{{ p.src }}" shape="rect" placeholder="thumb"></image-slot>
+            </div>
+            <span style="flex:1;min-width:0;display:flex;align-items:baseline">
+              <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:18px;flex:none">{{ p.no }}</span>
+              <span style="font:400 24px 'Newsreader',serif;letter-spacing:-.01em">{{ p.name }}</span>
+            </span>
+            <span class="m-work-meta" style="font:400 12px 'IBM Plex Mono',monospace;color:#A29B8E;flex:none">{{ p.meta }}</span>
           </a>
-          <div class="m-work-meta" style="font:400 12px 'IBM Plex Mono',monospace;color:#A29B8E;flex:none">{{ p.meta }}</div>
           <button type="button" class="m-tap" style="flex:none;background:none;cursor:pointer;border:1px solid #4A453E;color:#EDEAE3;font:600 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:12px 18px;transition:border-color .25s,color .25s" style-hover="border-color:var(--accent,#A34A24);color:var(--accent,#A34A24)" style-focus="border-color:var(--accent,#A34A24);color:var(--accent,#A34A24);outline:none">Spec PDF ↓</button>
         </div>
       </sc-for>
-      <div style="border-top:1px solid #37332E;padding-top:22px"><a href="#" onClick="{{ noop }}" style="font:400 12px 'IBM Plex Mono',monospace;color:#A29B8E;transition:color .25s" style-hover="color:var(--accent,#A34A24)">Full catalogue — 21 pieces →</a></div>
+      <div style="border-top:1px solid #37332E;padding-top:22px"><a href="gallery.html" style="font:400 12px 'IBM Plex Mono',monospace;color:#A29B8E;transition:color .25s" style-hover="color:var(--accent,#A34A24)">Full catalogue — 36 images →</a></div>
     </div>
   </section>
 
@@ -237,7 +239,7 @@
     <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:48px">The work, closely</div>
     <div class="m-grid-2" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:56px">
       <article style="display:flex;flex-direction:column">
-        <div class="m-deep-img" style="height:460px;min-width:0;overflow:hidden;box-shadow:0 20px 48px rgba(27,25,23,.10)"><image-slot id="object-014" shape="rect" placeholder="Object — No. 014, gallery-grade"></image-slot></div>
+        <div class="m-deep-img" style="height:460px;min-width:0;overflow:hidden;box-shadow:0 20px 48px rgba(27,25,23,.10)"><image-slot id="object-014" swap shape="rect" placeholder="Object — No. 014, gallery-grade" src="images/object-014.webp"></image-slot></div>
         <div style="font:500 11px 'IBM Plex Mono',monospace;color:#5C564C;margin:22px 0 12px;text-transform:uppercase;letter-spacing:.08em"><span style="color: var(--accent,#A34A24);">No. 014</span> — BRASS · FRAMED</div>
         <h3 style="font:400 27px/1.28 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">A weight that holds light the way a bowl holds water.</h3>
         <p style="font:400 14.5px/1.7 'Archivo',sans-serif;color:#4A443C;margin:0 0 20px;text-wrap:pretty">Cast in three pours over six weeks; the surface was left to oxidize before final seal. The client asked for calm — the crack running through the base was not removed.</p>
@@ -246,7 +248,7 @@
         </div>
       </article>
       <article style="display:flex;flex-direction:column">
-        <div class="m-deep-img" style="height:460px;min-width:0;overflow:hidden;box-shadow:0 20px 48px rgba(27,25,23,.10)"><image-slot id="object-009" shape="rect" placeholder="Object — No. 009, gallery-grade"></image-slot></div>
+        <div class="m-deep-img" style="height:460px;min-width:0;overflow:hidden;box-shadow:0 20px 48px rgba(27,25,23,.10)"><image-slot id="object-009" swap shape="rect" placeholder="Object — No. 009, gallery-grade" src="images/object-009.webp"></image-slot></div>
         <div style="font:500 11px 'IBM Plex Mono',monospace;color:#5C564C;margin:22px 0 12px;text-transform:uppercase;letter-spacing:.08em"><span style="color: var(--accent,#A34A24);">No. 009</span> — LOBBY COMMISSION - STRATA</div>
         <h3 style="font:400 27px/1.28 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">The long erosion keeps its own time.</h3>
         <p style="font:400 14.5px/1.7 'Archivo',sans-serif;color:#4A443C;margin:0 0 20px;text-wrap:pretty">Plaster ground with ash carried back from [site]; the surface is unsealed and still aging. Order and constraint, bouting with unpredictability.</p>
@@ -301,8 +303,8 @@
   <!-- FOOTER -->
   <footer data-screen-label="Footer" style="border-top:1px solid #D6CFC2">
     <div class="m-pad m-footer" style="max-width:1240px;margin:0 auto;padding:30px 48px;box-sizing:border-box;display:flex;justify-content:space-between;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
-      <span>*reserved: Process / Field Notes</span>
-      <span>© Studio — all works cast by hand</span>
+      <span>© {{ copyrightYear }} Isaac Anderson Art</span>
+      <span data-build-stamp="1" style="opacity:.55;letter-spacing:.06em">v2026.07.31.5</span>
     </div>
   </footer>
 
@@ -311,9 +313,7 @@
 
 </div>
 
-<div style="display:none;width:0;height:0;overflow:hidden"><x-import component-from-global-scope="image-slot" from="./image-slot.js" id="loader-slot" hint-size="0,0"></x-import></div>
-
-<img src="./laguna-piece-mrww9zyw-1zfm.jpg" alt="laguna-piece" width="1143" height="1617" loading="lazy" decoding="async" style="max-width: 100%; height: auto; display: block; object-fit: cover; width: 1143px; aspect-ratio: 1143 / 1617"><img src="./laguna-piece-mrwwamw1-dsep.jpg" alt="laguna-piece" width="1143" height="1617" loading="lazy" decoding="async" style="max-width: 100%; height: auto; display: block; object-fit: cover; width: 1143px; aspect-ratio: 1143 / 1617"></x-dc>
+<div style="display:none;width:0;height:0;overflow:hidden"><x-import component-from-global-scope="image-slot" from="./image-slot.js?v=20260731b" id="loader-slot" hint-size="0,0"></x-import></div></x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;showPricing&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#A34A24&quot;,&quot;options&quot;:[&quot;#A34A24&quot;,&quot;#5C6B5D&quot;,&quot;#41506B&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
 class Component extends DCLogic {
   state = { hovered: null, sent: false, scrolled: false, navOpen: false, navHidden: false, fabVisible: false, nearBottom: false, activeCard: 0 };
@@ -422,18 +422,37 @@ class Component extends DCLogic {
 
   renderVals() {
     const base = [
-      { no: 'No. 014', name: 'Abstract', meta: 'Cement, plaster · Residential · 2024', slot: 'thumb-014', href: 'Collection - Abstract.dc.html' },
-      { no: 'No. 009', name: 'Figurative', meta: 'Plaster, steel · Collection · 2023', slot: 'thumb-009', href: 'Collection - Figurative.dc.html' },
-      { no: 'No. 021', name: 'Sculptural', meta: 'Steel, cement · Commercial · 2025', slot: 'thumb-021', href: 'Collection - Sculptural.dc.html' },
+      { no: 'No. 014', name: 'Abstract', meta: 'Cement, plaster · Residential · 2024', slot: 'thumb-014', href: 'collection-abstract.html' },
+      { no: 'No. 009', name: 'Figurative', meta: 'Plaster, steel · Collection · 2023', slot: 'thumb-009', href: 'collection-figurative.html' },
+      { no: 'No. 021', name: 'Sculptural', meta: 'Steel, cement · Commercial · 2025', slot: 'thumb-021', href: 'collection-sculptural.html' },
     ];
     const pieces = base.map((p) => ({
       ...p,
+      src: 'images/' + p.slot + '.webp',
       thumbOp: this.state.hovered === p.no ? 1 : 0.45,
       onEnter: () => this.setState({ hovered: p.no }),
       onLeave: () => this.setState({ hovered: null }),
     }));
+    const slotNav = (href) => (e) => {
+      // Ignore clicks that belong to image-slot's own chrome (Replace/Edit/✕,
+      // empty-state browse, reframe drag) so editing still works.
+      const path = e.nativeEvent && e.nativeEvent.composedPath ? e.nativeEvent.composedPath() : [];
+      for (const n of path) {
+        if (!n || !n.classList) continue;
+        if (n.getAttribute && n.getAttribute('data-act')) return;
+        if (n.classList.contains('ctl') || n.classList.contains('empty') || n.classList.contains('spill')) return;
+      }
+      if (e.detail > 1) return; // double-click = reframe, not navigation
+      this._navT = setTimeout(() => { window.location.href = href; }, 200);
+    };
+    const slotNavCancel = () => clearTimeout(this._navT);
     return {
       pieces,
+      navImages: slotNav('gallery.html'),
+      navWorks: slotNav('#works'),
+      navInquire: slotNav('#inquire'),
+      navCancel: slotNavCancel,
+      copyrightYear: new Date().getFullYear(),
       navShadow: this.state.scrolled ? '0 10px 32px rgba(27,25,23,.10)' : 'none',
       navOpen: this.state.navOpen,
       navOpenCls: this.state.navOpen ? 'm-open' : '',

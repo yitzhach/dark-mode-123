@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<meta name="theme-color" content="#EDEAE3">
+<link rel="icon" href="./favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="manifest" href="./site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600;6..96,700;6..96,800&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&amp;family=Archivo:wght@400;500;600;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+  html{scroll-behavior:smooth}
+  body{margin:0;background:#EDEAE3;color:#1B1917;font-family:'Archivo',sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+  a{color:#1B1917;text-decoration:none}
+  a:hover{color:var(--accent,#A34A24)}
+  ::selection{background:var(--accent,#A34A24);color:#F5F3EE}
+  [data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+  [data-reveal].is-visible{opacity:1;transform:none}
+  @media (hover:none){
+    .m-tap:active,.m-submit:active{border-color:var(--accent,#A34A24) !important;color:var(--accent,#A34A24) !important}
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0ms !important;transition-duration:.01ms !important}
+    [data-reveal]{opacity:1 !important;transform:none !important}
+  }
+  @media (max-width:760px){
+    #inquire{scroll-margin-top:64px}
+    .m-form input,.m-form select,.m-form textarea{font-size:16px !important;padding:14px !important}
+    .m-nav{height:60px !important}
+    .m-tap{min-height:44px !important;display:inline-flex !important;align-items:center;justify-content:center}
+    .m-submit{padding:16px 30px !important;min-height:48px !important;align-self:stretch !important;text-align:center}
+    .m-pad{padding-left:max(20px,env(safe-area-inset-left)) !important;padding-right:max(20px,env(safe-area-inset-right)) !important}
+    .m-h1{font-size:clamp(42px,12.5vw,64px) !important}
+    .m-bio{grid-template-columns:1fr !important;gap:30px !important}
+    .m-portrait{height:auto !important;aspect-ratio:4/5}
+    .m-studio-img{height:auto !important;aspect-ratio:4/3}
+    .m-ledger{grid-template-columns:1fr !important;gap:34px !important}
+    .m-form{grid-template-columns:1fr !important;gap:32px !important;padding:30px 22px !important}
+    .m-form2{grid-template-columns:1fr !important}
+    .m-footer{flex-direction:column !important;gap:8px !important;padding-bottom:max(14px,env(safe-area-inset-bottom)) !important}
+    .m-burger{display:flex !important}
+    .m-navlinks{display:none !important}
+    .m-navlinks.m-open{display:flex !important;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0 !important;background:rgba(237,234,227,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #D6CFC2;box-shadow:0 22px 46px rgba(27,25,23,.14);padding:6px 20px 16px}
+    .m-navlinks.m-open > *{padding:15px 2px !important;border-bottom:1px solid #E2DBCD !important;font-size:15px !important;width:100%;box-sizing:border-box}
+    .m-navlinks.m-open > a:last-child{margin-top:12px;text-align:center;border-bottom:none !important;padding:16px 0 !important}
+    .m-fab-top{display:flex !important}
+  }
+  @media (min-width:761px) and (max-width:1024px){
+    .m-pad{padding-left:32px !important;padding-right:32px !important}
+    .m-nav{padding:0 32px !important}
+    .m-navlinks{gap:22px !important}
+    .m-portrait{height:460px !important}
+    .m-studio-img{height:420px !important}
+    .m-ledger{grid-template-columns:1fr 1fr !important;gap:34px !important}
+    .m-form{padding:40px !important;gap:44px !important}
+  }
+</style>
+</helmet>
+
+<div style="min-height:100vh">
+
+  <nav data-screen-label="Nav" class="m-pad m-nav" style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:72px;background:rgba(237,234,227,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #D6CFC2;box-shadow:{{ navShadow }};transform:{{ navTransform }};transition:box-shadow .35s ease,transform .3s ease">
+    <a href="index.html#top" style="display:flex;align-items:baseline;gap:10px;color:#1B1917">
+      <span style="font:700 20px/1 'Bodoni Moda',serif;text-transform:uppercase;letter-spacing:.015em">Isaac<span style="margin:0 .05em"> </span>Anderson</span>
+      <span style="position:relative;top:-4px;display:inline-flex;align-items:center;height:21px;box-sizing:border-box;font:600 12.6px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);letter-spacing:.08em;border:1px solid var(--accent,#A34A24);padding:0 8px;line-height:1">ART</span>
+    </a>
+    <button type="button" onClick="{{ toggleNav }}" aria-label="Menu" aria-expanded="{{ navOpen }}" class="m-burger" style="display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:44px;height:44px;background:none;border:none;cursor:pointer;padding:0"><span style="display:block;width:24px;height:2px;background:#1B1917"></span><span style="display:block;width:24px;height:2px;background:#1B1917"></span><span style="display:block;width:24px;height:2px;background:#1B1917"></span></button>
+    <div class="m-navlinks {{ navOpenCls }}" onClick="{{ closeNav }}" style="display:flex;align-items:center;gap:38px">
+      <a href="commissions.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">01</span>Commissions</a>
+      <a href="index.html#works" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">02</span>Works</a>
+      <a href="process.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">03</span>Process</a>
+      <a href="about.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;color:var(--accent,#A34A24);border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">04</span>About</a>
+      <a href="#inquire" style="background:var(--accent,#A34A24);color:#F5F3EE;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:13px 26px;transition:background .25s ease" style-hover="background:#1B1917;color:#F5F3EE">Inquire</a>
+    </div>
+  </nav>
+
+  <header data-screen-label="About header" class="m-pad" style="max-width:1240px;margin:0 auto;padding:56px 48px 34px;box-sizing:border-box">
+    <a href="index.html#top" style="font:500 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C;display:inline-flex;align-items:center;gap:8px">← Index</a>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-top:22px">
+      <div style="min-width:0">
+        <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--accent,#A34A24);margin-bottom:14px">About — No. 04</div>
+        <h1 class="m-h1" style="font:700 clamp(44px,6.6vw,82px)/0.98 'Bodoni Moda',serif;text-transform:uppercase;letter-spacing:.005em;margin:0">Isaac Anderson</h1>
+      </div>
+      <div style="font:400 13px 'IBM Plex Mono',monospace;color:#5C564C;padding-bottom:10px;flex:none">Sculpture · Mixed media</div>
+    </div>
+  </header>
+
+  <section data-reveal="" data-screen-label="Bio" class="m-pad" style="max-width:1240px;margin:0 auto;padding:20px 48px 72px;box-sizing:border-box">
+    <div class="m-bio" style="display:grid;grid-template-columns:.85fr 1.15fr;gap:56px;align-items:start">
+      <div class="m-portrait" style="height:540px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
+        <image-slot id="about-portrait" shape="rect" loading="eager" swap placeholder="Portrait — Isaac in the studio"></image-slot>
+      </div>
+      <div>
+        <p style="font:400 clamp(21px,2.3vw,27px)/1.45 'Newsreader',serif;font-style:italic;margin:0 0 26px;text-wrap:pretty">I build the order. The material supplies the entropy.</p>
+        <p style="font:400 15.5px/1.8 'Archivo',sans-serif;color:#4A443C;margin:0 0 18px;text-wrap:pretty">Isaac Anderson makes cast sculpture and mixed-media relief in cement, plaster, and steel. He works between two studios — Southern California and Southern Kentucky — and the split shows up in the work: one half built to tolerance, the other left to weather.</p>
+        <p style="font:400 15.5px/1.8 'Archivo',sans-serif;color:#4A443C;margin:0 0 18px;text-wrap:pretty">Trained in [discipline] at [school], he came to casting through [route] and has been pouring since [year]. Each piece begins as a controlled form and is finished by processes he doesn't direct: hydration, pigment migration, hairline cracking, and the slow ageing that continues in whatever room the work ends up in.</p>
+        <p style="font:400 15.5px/1.8 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">He works to commission for lobbies, hospitality interiors, and private collections, and keeps a small number of available works in the catalogue at any time.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px 28px;border-top:1px solid #D6CFC2;margin-top:30px;padding-top:22px;font:400 12.5px/1.7 'IBM Plex Mono',monospace;color:#5C564C">
+          <div><span style="color:var(--accent,#A34A24)">Studios</span><br>Southern California<br>Southern Kentucky</div>
+          <div><span style="color:var(--accent,#A34A24)">Materials</span><br>Cement · plaster<br>Steel · pigment</div>
+          <div><span style="color:var(--accent,#A34A24)">Works to</span><br>Commission<br>Available catalogue</div>
+          <div><span style="color:var(--accent,#A34A24)">Enquiries</span><br><a href="mailto:studio@[domain]" style="color:inherit">studio@[domain]</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-reveal="" data-screen-label="Statement" class="m-pad" style="max-width:1240px;margin:0 auto;padding:0 48px 72px;box-sizing:border-box">
+    <div style="border:1px solid #1B1917;background:#F5F3EE;padding:clamp(30px,4vw,60px)">
+      <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--accent,#A34A24);margin-bottom:22px">Artist statement</div>
+      <p style="font:400 clamp(22px,2.7vw,33px)/1.38 'Newsreader',serif;margin:0 0 22px;max-width:900px;text-wrap:pretty">Cement records everything that happens to it and forgives nothing. I front-load the order — the steel, the formwork, the single pour — and then hand the piece to processes I can only partly steer.</p>
+      <p style="font:400 15.5px/1.8 'Archivo',sans-serif;color:#4A443C;margin:0;max-width:720px;text-wrap:pretty">What comes back is neither accident nor design. The hairline that opens on the fourth day was not drawn, but it was made possible. I am interested in that narrow band where control ends and the material takes over, and in surfaces honest enough to show where the line fell.</p>
+    </div>
+  </section>
+
+  <section data-reveal="" data-screen-label="Studio" class="m-pad" style="max-width:1240px;margin:0 auto;padding:0 48px 72px;box-sizing:border-box">
+    <div class="m-studio-img" style="position:relative;height:520px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
+      <image-slot id="about-studio" shape="rect" swap placeholder="Studio — bench, forms, work in progress"></image-slot>
+      <div style="position:absolute;left:22px;bottom:22px;background:rgba(237,234,227,.94);border:1px solid #1B1917;padding:9px 14px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em">Studio — Southern California / Southern Kentucky</div>
+    </div>
+  </section>
+
+  <section data-reveal="" data-screen-label="Ledger" class="m-pad" style="max-width:1240px;margin:0 auto;padding:0 48px 88px;box-sizing:border-box">
+    <div class="m-ledger" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:44px 40px">
+      <div>
+        <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--accent,#A34A24);border-bottom:1px solid #1B1917;padding-bottom:12px;margin-bottom:16px">Education</div>
+        <div style="font:400 13px/1.9 'IBM Plex Mono',monospace;color:#5C564C">
+          <div style="padding:8px 0;border-bottom:1px solid #D6CFC2">[BFA, discipline]<br>[School] · [year]</div>
+          <div style="padding:8px 0;border-bottom:1px solid #D6CFC2">[Residency / workshop]<br>[Place] · [year]</div>
+          <div style="padding:8px 0">[Apprenticeship]<br>[Place] · [year]</div>
+        </div>
+      </div>
+      <div>
+        <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--accent,#A34A24);border-bottom:1px solid #1B1917;padding-bottom:12px;margin-bottom:16px">Selected exhibitions</div>
+        <div style="font:400 13px/1.9 'IBM Plex Mono',monospace;color:#5C564C">
+          <div style="padding:8px 0;border-bottom:1px solid #D6CFC2">[Show title]<br>[Venue], [City] · [year]</div>
+          <div style="padding:8px 0;border-bottom:1px solid #D6CFC2">[Show title]<br>[Venue], [City] · [year]</div>
+          <div style="padding:8px 0;border-bottom:1px solid #D6CFC2">[Group show]<br>[Venue], [City] · [year]</div>
+          <div style="padding:8px 0">[Open studio]<br>[City] · [year]</div>
+        </div>
+      </div>
+      <div>
+        <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--accent,#A34A24);border-bottom:1px solid #1B1917;padding-bottom:12px;margin-bottom:16px">Press</div>
+        <div style="font:400 13px/1.9 'IBM Plex Mono',monospace;color:#5C564C">
+          <div style="padding:8px 0;border-bottom:1px solid #D6CFC2">[Publication]<br>[Article title] · [year]</div>
+          <div style="padding:8px 0;border-bottom:1px solid #D6CFC2">[Publication]<br>[Feature] · [year]</div>
+          <div style="padding:8px 0">[Podcast / interview]<br>[Title] · [year]</div>
+        </div>
+      </div>
+      <div>
+        <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--accent,#A34A24);border-bottom:1px solid #1B1917;padding-bottom:12px;margin-bottom:16px">Materials &amp; methods</div>
+        <div style="font:400 13px/1.9 'IBM Plex Mono',monospace;color:#5C564C">
+          <div style="padding:8px 0;border-bottom:1px solid #D6CFC2">Portland cement, casting plaster, raw pigment</div>
+          <div style="padding:8px 0;border-bottom:1px solid #D6CFC2">Welded steel armature; sealed formwork</div>
+          <div style="padding:8px 0;border-bottom:1px solid #D6CFC2">Single continuous pour; hand-vibrated</div>
+          <div style="padding:8px 0">Hand-honed faces, left unsealed</div>
+        </div>
+        <a href="process.html" class="m-tap" style="display:inline-flex;margin-top:20px;border:1px solid #1B1917;padding:11px 20px;font:600 10.5px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;transition:background .25s,color .25s" style-hover="background:#1B1917;color:#F5F3EE">Full process →</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="inquire" data-reveal="" data-screen-label="Inquiry form" class="m-pad" style="max-width:1240px;margin:0 auto;padding:0 48px 96px;box-sizing:border-box">
+    <div class="m-form" style="border:1px solid #1B1917;background:#F5F3EE;padding:56px;display:grid;grid-template-columns:1fr 1.4fr;gap:64px;box-shadow:0 32px 80px rgba(27,25,23,.10)">
+      <div>
+        <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--accent,#A34A24);margin-bottom:16px">Inquire</div>
+        <h2 style="font:400 33px/1.2 'Newsreader',serif;letter-spacing:-.015em;margin:0 0 16px">Start a commission</h2>
+        <p style="font:400 14.5px/1.7 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Three fields, one conversation. We reply within two working days with questions, timelines, and — if the fit is right — a concept direction.</p>
+        <div style="font:400 12px/2.1 'IBM Plex Mono',monospace;color:#5C564C;margin-top:30px;border-top:1px solid #D6CFC2;padding-top:20px"><a href="mailto:studio@[domain]" style="color:inherit">studio@[domain]</a><br>Studio — [City, Country]<br>Instagram · Field Notes*</div>
+      </div>
+      <sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+        <form onSubmit="{{ submit }}" style="display:flex;flex-direction:column;gap:18px">
+          <div class="m-form2" style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+            <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Project type
+              <select style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+                <option>Lobby / commercial</option><option>Hospitality</option><option>Private collection</option><option>Other</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Timeline
+              <select style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+                <option>Within 3 months</option><option>3–6 months</option><option>6+ months</option><option>Exploring</option>
+              </select>
+            </label>
+          </div>
+          <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Project location
+            <input type="text" placeholder="City, country" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Anything else <span style="text-transform:none;letter-spacing:0">(optional)</span>
+            <input type="text" placeholder="Space, scale, or the feeling you're after" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+          </label>
+          <button type="submit" class="m-submit" style="align-self:flex-start;background:var(--accent,#A34A24);color:#F5F3EE;border:none;cursor:pointer;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:13px 26px;margin-top:6px;transition:background .25s ease" style-hover="background:#1B1917">Send inquiry</button>
+        </form>
+      </sc-if>
+      <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+        <div aria-live="polite" style="display:flex;flex-direction:column;justify-content:center;gap:12px">
+          <div style="font:400 27px 'Newsreader',serif;font-style:italic">Received.</div>
+          <p style="font:400 14.5px/1.7 'Archivo',sans-serif;color:#4A443C;margin:0;max-width:420px;text-wrap:pretty">Thank you — we'll come back to you within two working days.</p>
+        </div>
+      </sc-if>
+    </div>
+  </section>
+
+  <footer data-screen-label="Footer" style="border-top:1px solid #D6CFC2">
+    <div class="m-pad m-footer" style="max-width:1240px;margin:0 auto;padding:30px 48px;box-sizing:border-box;display:flex;justify-content:space-between;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
+      <span>© {{ copyrightYear }} Isaac Anderson Art</span>
+      <span>About — No. 04</span>
+    </div>
+  </footer>
+
+  <button type="button" class="m-fab-top" onClick="{{ scrollTop }}" aria-label="Back to top" style="display:none;position:fixed;left:calc(16px + env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;background:#F5F3EE;color:#1B1917;border:1px solid #1B1917;font:600 15px 'IBM Plex Mono',monospace;width:44px;height:44px;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 12px 28px rgba(27,25,23,.18);opacity:{{ topOpacity }};transform:{{ topTransform }};transition:opacity .3s ease,transform .3s ease;pointer-events:{{ topPointer }}">↑</button>
+
+</div>
+
+<div style="display:none;width:0;height:0;overflow:hidden"><x-import component-from-global-scope="image-slot" from="./image-slot.js?v=20260731b" id="loader-slot" hint-size="0,0"></x-import></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#A34A24&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#A34A24&quot;,&quot;#6E4B2A&quot;,&quot;#2F4636&quot;,&quot;#1B1917&quot;]}}">
+class Component extends DCLogic {
+  state = { scrolled: false, navOpen: false, navHidden: false, topVisible: false, sent: false };
+
+  componentDidMount() {
+    this.applyAccent();
+    this._onScroll = () => {
+      const y = window.scrollY;
+      const sc = y > 8;
+      if (sc !== this.state.scrolled) this.setState({ scrolled: sc });
+      const isMobile = window.matchMedia && window.matchMedia('(max-width:760px)').matches;
+      if (isMobile) {
+        const dy = y - (this._lastY ?? y);
+        let navHidden = this.state.navHidden;
+        if (y < 80) navHidden = false;
+        else if (dy > 4) navHidden = true;
+        else if (dy < -4) navHidden = false;
+        const topVisible = y > 300;
+        if (navHidden !== this.state.navHidden || topVisible !== this.state.topVisible) {
+          this.setState({ navHidden, topVisible });
+        }
+      } else if (this.state.navHidden || this.state.topVisible) {
+        this.setState({ navHidden: false, topVisible: false });
+      }
+      this._lastY = y;
+    };
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+    this._io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('is-visible'); });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+    document.querySelectorAll('[data-reveal]').forEach((el) => this._io.observe(el));
+  }
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this._onScroll);
+    if (this._io) this._io.disconnect();
+  }
+  componentDidUpdate() { this.applyAccent(); }
+  applyAccent() { document.body.style.setProperty('--accent', this.props.accent ?? '#A34A24'); }
+
+  renderVals() {
+    return {
+      copyrightYear: new Date().getFullYear(),
+      navShadow: this.state.scrolled ? '0 10px 32px rgba(27,25,23,.10)' : 'none',
+      navOpen: this.state.navOpen,
+      navOpenCls: this.state.navOpen ? 'm-open' : '',
+      toggleNav: () => this.setState((st) => { const open = !st.navOpen; document.body.style.overflow = open ? 'hidden' : ''; return { navOpen: open }; }),
+      closeNav: () => { if (this.state.navOpen) { document.body.style.overflow = ''; this.setState({ navOpen: false }); } },
+      navTransform: this.state.navHidden ? 'translateY(-100%)' : 'translateY(0)',
+      topOpacity: this.state.topVisible ? 1 : 0,
+      topTransform: this.state.topVisible ? 'translateY(0)' : 'translateY(14px)',
+      topPointer: this.state.topVisible ? 'auto' : 'none',
+      scrollTop: () => window.scrollTo({ top: 0, behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches) ? 'auto' : 'smooth' }),
+      sent: this.state.sent,
+      notSent: !this.state.sent,
+      submit: (e) => { e.preventDefault(); this.setState({ sent: true }); },
+    };
+  }
+}
+</script>
+</body>
+</html>

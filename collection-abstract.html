@@ -8,6 +8,13 @@
 <body>
 <x-dc>
 <helmet data-dc-atomics="">
+<meta name="theme-color" content="#EDEAE3">
+<link rel="icon" href="./favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="manifest" href="./site.webmanifest">
+<!-- Editor-only drag-to-rearrange for the image slots. Self-gates: does nothing on the published site. To enable elsewhere, copy this one line into that page's helmet. -->
+<script src="./expand-image.js?v=20260731b"></script>
+<script src="./arrange-images.js?v=20260731b"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600;6..96,700;6..96,800&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&amp;family=Archivo:wght@400;500;600;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <style>
@@ -16,15 +23,21 @@
   a{color:#1B1917;text-decoration:none}
   a:hover{color:var(--accent,#A34A24)}
   ::selection{background:var(--accent,#A34A24);color:#F5F3EE}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0ms !important;transition-duration:.01ms !important}
+  }
 
   /* ---- MOBILE (<=760px) ---- */
   @media (max-width:760px){
-    .m-pad{padding-left:20px !important;padding-right:20px !important}
+    .m-pad{padding-left:max(20px,env(safe-area-inset-left)) !important;padding-right:max(20px,env(safe-area-inset-right)) !important}
+    .m-nav{height:60px !important}
+    .m-tap{min-height:44px !important;display:inline-flex !important;align-items:center;justify-content:center}
     .m-col-head{padding:32px 20px 20px !important}
     .m-h1{font-size:clamp(40px,12vw,60px) !important}
     .m-grid-3{grid-template-columns:1fr !important}
-    .m-card-img{height:300px !important}
-    .m-footer{flex-direction:column !important;gap:8px !important}
+    .m-card-img{aspect-ratio:4/5 !important}
+    .m-footer{flex-direction:column !important;gap:8px !important;padding-bottom:max(14px,env(safe-area-inset-bottom)) !important}
     .m-lb{padding:16px !important}
     .m-lb-nav{width:44px !important;height:44px !important}
     .m-lb-prev{left:10px !important}
@@ -34,23 +47,35 @@
     .m-navlinks.m-open{display:flex !important;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0 !important;background:rgba(237,234,227,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #D6CFC2;box-shadow:0 22px 46px rgba(27,25,23,.14);padding:6px 20px 16px}
     .m-navlinks.m-open > *{padding:15px 2px !important;border-bottom:1px solid #E2DBCD !important;font-size:15px !important;width:100%;box-sizing:border-box}
     .m-navlinks.m-open > a[href$="#inquire"]{margin-top:12px;text-align:center;border-bottom:none !important;padding:16px 0 !important}
+    .m-fab-top{display:flex !important}
+  }
+  @media (hover:none){
+    .m-press{transition:transform .18s ease}
+    .m-press:active{transform:scale(.985)}
+    .m-tap:active{color:var(--accent,#A34A24) !important}
+  }
+  @media (min-width:761px) and (max-width:1024px){
+    .m-pad{padding-left:32px !important;padding-right:32px !important}
+    .m-col-head{padding:44px 32px 26px !important}
+    .m-nav{padding:0 32px !important}
+    .m-grid-3{gap:20px !important}
   }
 </style>
 </helmet>
 
 <div style="min-height:100vh">
 
-  <nav data-screen-label="Nav" class="m-pad" style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:72px;background:rgba(237,234,227,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #D6CFC2;box-shadow:{{ navShadow }};transition:box-shadow .35s ease">
+  <nav data-screen-label="Nav" class="m-pad m-nav" style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:72px;background:rgba(237,234,227,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #D6CFC2;box-shadow:{{ navShadow }};transform:{{ navTransform }};transition:box-shadow .35s ease,transform .3s ease">
     <a href="index.html#top" style="display:flex;align-items:baseline;gap:10px;color:#1B1917">
       <span style="font:700 20px/1 'Bodoni Moda',serif;text-transform:uppercase;letter-spacing:.015em">Isaac<span style="margin:0 .05em"> </span>Anderson</span>
       <span style="position:relative;top:-4px;display:inline-flex;align-items:center;height:21px;box-sizing:border-box;font:600 12.6px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);letter-spacing:.08em;border:1px solid var(--accent,#A34A24);padding:0 8px;line-height:1">ART</span>
     </a>
     <button type="button" onClick="{{ toggleNav }}" aria-label="Menu" aria-expanded="{{ navOpen }}" class="m-burger" style="display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:44px;height:44px;background:none;border:none;cursor:pointer;padding:0"><span style="display:block;width:24px;height:2px;background:#1B1917"></span><span style="display:block;width:24px;height:2px;background:#1B1917"></span><span style="display:block;width:24px;height:2px;background:#1B1917"></span></button>
     <div class="m-navlinks {{ navOpenCls }}" onClick="{{ closeNav }}" style="display:flex;align-items:center;gap:38px">
-      <a href="index.html#commissions" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">01</span>Commissions</a>
+      <a href="commissions.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">01</span>Commissions</a>
       <a href="index.html#works" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;color:var(--accent,#A34A24);border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">02</span>Works</a>
-      <span aria-disabled="true" title="Coming soon" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;color:#5C564C;padding:6px 0;cursor:default"><span style="font:500 10px 'IBM Plex Mono',monospace;margin-right:6px">03</span>Process</span>
-      <span aria-disabled="true" title="Coming soon" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;color:#5C564C;padding:6px 0;cursor:default"><span style="font:500 10px 'IBM Plex Mono',monospace;margin-right:6px">04</span>About</span>
+      <a href="process.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">03</span>Process</a>
+      <a href="about.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">04</span>About</a>
       <a href="index.html#inquire" style="background:var(--accent,#A34A24);color:#F5F3EE;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:13px 26px;transition:background .25s ease" style-hover="background:#1B1917;color:#F5F3EE">Inquire</a>
     </div>
   </nav>
@@ -69,85 +94,85 @@
 
   <section data-screen-label="Works grid" class="m-pad" style="max-width:1240px;margin:0 auto;padding:24px 48px 96px;box-sizing:border-box">
     <div class="m-grid-3" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px">
-              <div data-i="0" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-1" hires-target="abstract-1-full" hires-maxdim="2800" shape="rect" placeholder="Abstract — piece 1"></image-slot></div>
+              <div data-i="0" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-1" hires-target="abstract-1-full" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Abstract — piece 1" src="images/abstract-1.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 001</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
-        <div data-i="1" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-2" hires-target="abstract-2-full" hires-maxdim="2800" shape="rect" placeholder="Abstract — piece 2"></image-slot></div>
+        <div data-i="1" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-2" hires-target="abstract-2-full" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Abstract — piece 2" src="images/abstract-2.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 002</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
-        <div data-i="2" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-3" hires-target="abstract-3-full" hires-maxdim="2800" shape="rect" placeholder="Abstract — piece 3"></image-slot></div>
+        <div data-i="2" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-3" hires-target="abstract-3-full" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Abstract — piece 3" src="images/abstract-3.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 003</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
-        <div data-i="3" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-4" hires-target="abstract-4-full" hires-maxdim="2800" shape="rect" placeholder="Abstract — piece 4"></image-slot></div>
+        <div data-i="3" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-4" hires-target="abstract-4-full" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Abstract — piece 4" src="images/abstract-4.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 004</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
-        <div data-i="4" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-5" hires-target="abstract-5-full" hires-maxdim="2800" shape="rect" placeholder="Abstract — piece 5"></image-slot></div>
+        <div data-i="4" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-5" hires-target="abstract-5-full" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Abstract — piece 5" src="images/abstract-5.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 005</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
-        <div data-i="5" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-6" hires-target="abstract-6-full" hires-maxdim="2800" shape="rect" placeholder="Abstract — piece 6"></image-slot></div>
+        <div data-i="5" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-6" hires-target="abstract-6-full" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Abstract — piece 6" src="images/abstract-6.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 006</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
-        <div data-i="6" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-7" hires-target="abstract-7-full" hires-maxdim="2800" shape="rect" placeholder="Abstract — piece 7"></image-slot></div>
+        <div data-i="6" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-7" hires-target="abstract-7-full" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Abstract — piece 7" src="images/abstract-7.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 007</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
-        <div data-i="7" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-8" hires-target="abstract-8-full" hires-maxdim="2800" shape="rect" placeholder="Abstract — piece 8"></image-slot></div>
+        <div data-i="7" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-8" hires-target="abstract-8-full" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Abstract — piece 8" src="images/abstract-8.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 008</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
-        <div data-i="8" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-9" hires-target="abstract-9-full" hires-maxdim="2800" shape="rect" placeholder="Abstract — piece 9"></image-slot></div>
+        <div data-i="8" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-9" hires-target="abstract-9-full" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Abstract — piece 9" src="images/abstract-9.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 009</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
-        <div data-i="9" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-10" hires-target="abstract-10-full" hires-maxdim="2800" shape="rect" placeholder="Abstract — piece 10"></image-slot></div>
+        <div data-i="9" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-10" hires-target="abstract-10-full" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Abstract — piece 10" src="images/abstract-10.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 010</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
-        <div data-i="10" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-11" hires-target="abstract-11-full" hires-maxdim="2800" shape="rect" placeholder="Abstract — piece 11"></image-slot></div>
+        <div data-i="10" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-11" hires-target="abstract-11-full" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Abstract — piece 11" src="images/abstract-11.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 011</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
-        <div data-i="11" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="height:280px;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-12" hires-target="abstract-12-full" hires-maxdim="2800" shape="rect" placeholder="Abstract — piece 12"></image-slot></div>
+        <div data-i="11" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="abstract-12" hires-target="abstract-12-full" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Abstract — piece 12" src="images/abstract-12.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 012</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
@@ -159,37 +184,60 @@
 
   <footer data-screen-label="Footer" style="border-top:1px solid #D6CFC2">
     <div class="m-pad m-footer" style="max-width:1240px;margin:0 auto;padding:30px 48px;box-sizing:border-box;display:flex;justify-content:space-between;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
-      <span>*reserved: Process / Field Notes</span>
-      <span>© Studio — all works cast by hand</span>
+      <span>© {{ copyrightYear }} Isaac Anderson Art</span>
     </div>
   </footer>
 
   <sc-if value="{{ lightboxOpen }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Lightbox" onClick="{{ closeLightbox }}" class="m-lb" style="position:fixed;inset:0;z-index:100;background:rgba(15,13,11,.94);display:flex;align-items:center;justify-content:center;padding:40px;box-sizing:border-box">
-      <button type="button" onClick="{{ closeLightbox }}" style="position:absolute;top:26px;right:32px;background:none;border:none;color:#EDEAE3;font:500 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;padding:8px" style-hover="color:var(--accent,#A34A24)">Close ✕</button>
+      <button type="button" onClick="{{ closeLightbox }}" class="m-tap" style="position:absolute;top:26px;right:32px;background:none;border:none;color:#EDEAE3;font:500 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;padding:8px 14px" style-hover="color:var(--accent,#A34A24)">Close ✕</button>
       <button type="button" onClick="{{ prevImage }}" aria-label="Previous" class="m-lb-nav m-lb-prev" style="position:absolute;left:24px;top:50%;transform:translateY(-50%);background:none;border:1px solid rgba(237,234,227,.3);color:#EDEAE3;width:52px;height:52px;border-radius:50%;cursor:pointer;font:400 20px system-ui,sans-serif;display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s" style-hover="border-color:var(--accent,#A34A24);color:var(--accent,#A34A24)">←</button>
-<sc-if value="{{ lightboxUrl }}" hint-placeholder-val="{{ false }}">
-        <img onClick="{{ stop }}" src="{{ lightboxUrl }}" alt="{{ lightboxCap }}" style="max-width:92vw;max-height:90vh;width:auto;height:auto;object-fit:contain;box-shadow:0 40px 100px rgba(0,0,0,.5)">
-      </sc-if>
+{{ lightboxImg }}
       <button type="button" onClick="{{ nextImage }}" aria-label="Next" class="m-lb-nav m-lb-next" style="position:absolute;right:24px;top:50%;transform:translateY(-50%);background:none;border:1px solid rgba(237,234,227,.3);color:#EDEAE3;width:52px;height:52px;border-radius:50%;cursor:pointer;font:400 20px system-ui,sans-serif;display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s" style-hover="border-color:var(--accent,#A34A24);color:var(--accent,#A34A24)">→</button>
       <div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font:400 12px 'IBM Plex Mono',monospace;color:#A29B8E;letter-spacing:.08em">{{ lightboxCap }} — {{ lightboxPos }} / {{ workCount }}</div>
     </div>
   </sc-if>
 
+  <button type="button" class="m-fab-top" onClick="{{ scrollTop }}" aria-label="Back to top" style="display:none;position:fixed;left:calc(16px + env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;background:#F5F3EE;color:#1B1917;border:1px solid #1B1917;font:600 15px 'IBM Plex Mono',monospace;width:44px;height:44px;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 12px 28px rgba(27,25,23,.18);opacity:{{ topOpacity }};transform:{{ topTransform }};transition:opacity .3s ease,transform .3s ease;pointer-events:{{ topPointer }}">↑</button>
+
 </div>
 
 
-<div style="display:none;width:0;height:0;overflow:hidden"><x-import component-from-global-scope="image-slot" from="./image-slot.js" id="loader-slot" hint-size="0,0"></x-import><image-slot id="abstract-1-full" shape="rect"></image-slot><image-slot id="abstract-2-full" shape="rect"></image-slot><image-slot id="abstract-3-full" shape="rect"></image-slot><image-slot id="abstract-4-full" shape="rect"></image-slot><image-slot id="abstract-5-full" shape="rect"></image-slot><image-slot id="abstract-6-full" shape="rect"></image-slot><image-slot id="abstract-7-full" shape="rect"></image-slot><image-slot id="abstract-8-full" shape="rect"></image-slot><image-slot id="abstract-9-full" shape="rect"></image-slot><image-slot id="abstract-10-full" shape="rect"></image-slot><image-slot id="abstract-11-full" shape="rect"></image-slot><image-slot id="abstract-12-full" shape="rect"></image-slot></div>
+<div style="display:none;width:0;height:0;overflow:hidden"><x-import component-from-global-scope="image-slot" from="./image-slot.js?v=20260731b" id="loader-slot" hint-size="0,0"></x-import><image-slot id="abstract-1-full" shape="rect"></image-slot><image-slot id="abstract-2-full" shape="rect"></image-slot><image-slot id="abstract-3-full" shape="rect"></image-slot><image-slot id="abstract-4-full" shape="rect" src="images/abstract-4-full.webp"></image-slot><image-slot id="abstract-5-full" shape="rect" src="images/abstract-5-full.webp"></image-slot><image-slot id="abstract-6-full" shape="rect" src="images/abstract-6-full.webp"></image-slot><image-slot id="abstract-7-full" shape="rect"></image-slot><image-slot id="abstract-8-full" shape="rect" src="images/abstract-8-full.webp"></image-slot><image-slot id="abstract-9-full" shape="rect" src="images/abstract-9-full.webp"></image-slot><image-slot id="abstract-10-full" shape="rect" src="images/abstract-10-full.webp"></image-slot><image-slot id="abstract-11-full" shape="rect"></image-slot><image-slot id="abstract-12-full" shape="rect" src="images/abstract-12-full.webp"></image-slot></div>
+
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" data-bg-color="#EDEAE3">
+<rect width="200" height="200" fill="#EDEAE3"/>
+<rect x="60" y="45" width="35" height="110" fill="none" stroke="#A34A24" stroke-width="3"/>
+<circle cx="140" cy="100" r="32" fill="none" stroke="#1B1917" stroke-width="3"/>
+</svg>
+</template>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#A34A24&quot;,&quot;options&quot;:[&quot;#A34A24&quot;,&quot;#5C6B5D&quot;,&quot;#41506B&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+<script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { scrolled: false, lightboxIndex: null, navOpen: false };
+  state = { scrolled: false, lightboxIndex: null, navOpen: false, navHidden: false, topVisible: false };
 
   componentDidMount() {
     this.applyAccent();
     this._onScroll = () => {
-      const sc = window.scrollY > 8;
+      const y = window.scrollY;
+      const sc = y > 8;
       if (sc !== this.state.scrolled) this.setState({ scrolled: sc });
+      const isMobile = window.matchMedia && window.matchMedia('(max-width:760px)').matches;
+      if (isMobile) {
+        const dy = y - (this._lastY ?? y);
+        let navHidden = this.state.navHidden;
+        if (y < 80) navHidden = false;
+        else if (dy > 4) navHidden = true;
+        else if (dy < -4) navHidden = false;
+        const topVisible = y > 300;
+        if (navHidden !== this.state.navHidden || topVisible !== this.state.topVisible) {
+          this.setState({ navHidden, topVisible });
+        }
+      } else if (this.state.navHidden || this.state.topVisible) {
+        this.setState({ navHidden: false, topVisible: false });
+      }
+      this._lastY = y;
     };
     window.addEventListener('scroll', this._onScroll, { passive: true });
     this._onKeydown = (e) => {
@@ -219,7 +267,24 @@ class Component extends DCLogic {
     return (sib && sib.getAttribute('src')) ? sib.src : null;
   }
   openLightbox(i, slotId) {
+    // A slot in Edit (reframe) mode owns the pointer — the ⤢ button is the
+    // only way into the lightbox then (it sets __forceLightbox).
+    if (!window.__forceLightbox && document.querySelector('image-slot[data-reframe]')) return;
+    // Arrange mode owns clicks on the grid — don't open the lightbox mid-drag.
+    if (document.documentElement.hasAttribute('data-arranging')) return;
     if (this.getSlotUrl(slotId)) this.setState({ lightboxIndex: i });
+  }
+
+  buildLightboxImg(url, alt, maxW, maxH, slotId) {
+    if (!url) return null;
+    // Saved look (Adjust panel) travels with the slot id into the lightbox.
+    const look = (slotId && window.ImageSlots && window.ImageSlots.filter)
+      ? window.ImageSlots.filter(slotId) : '';
+    return React.createElement('img', {
+      src: url, alt,
+      onClick: (e) => e.stopPropagation(),
+      style: { maxWidth: maxW, maxHeight: maxH, width: 'auto', height: 'auto', objectFit: 'contain', filter: look || 'none', boxShadow: '0 40px 100px rgba(0,0,0,.5)' },
+    });
   }
 
   renderVals() {
@@ -239,13 +304,19 @@ class Component extends DCLogic {
     return {
       works,
       workCount: count,
+      copyrightYear: new Date().getFullYear(),
       navShadow: this.state.scrolled ? '0 10px 32px rgba(27,25,23,.10)' : 'none',
       navOpen: this.state.navOpen,
       navOpenCls: this.state.navOpen ? 'm-open' : '',
-      toggleNav: () => this.setState((st) => ({ navOpen: !st.navOpen })),
-      closeNav: () => { if (this.state.navOpen) this.setState({ navOpen: false }); },
+      toggleNav: () => this.setState((st) => { const open = !st.navOpen; document.body.style.overflow = open ? 'hidden' : ''; return { navOpen: open }; }),
+      closeNav: () => { if (this.state.navOpen) { document.body.style.overflow = ''; this.setState({ navOpen: false }); } },
+      navTransform: this.state.navHidden ? 'translateY(-100%)' : 'translateY(0)',
+      topOpacity: this.state.topVisible ? 1 : 0,
+      topTransform: this.state.topVisible ? 'translateY(0)' : 'translateY(14px)',
+      topPointer: this.state.topVisible ? 'auto' : 'none',
+      scrollTop: () => window.scrollTo({ top: 0, behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches) ? 'auto' : 'smooth' }),
       lightboxOpen,
-      lightboxUrl: lightboxOpen ? (this.getSlotUrl(works[idx].fullSlot) || this.getSlotUrl(works[idx].slot)) : null,
+      lightboxImg: this.buildLightboxImg(lightboxOpen ? (this.getSlotUrl(works[idx].fullSlot) || this.getSlotUrl(works[idx].slot)) : null, lightboxOpen ? works[idx].no : '', '92vw', '90vh', lightboxOpen ? works[idx].slot : null),
       lightboxCap: lightboxOpen ? works[idx].no : '',
       lightboxPos: lightboxOpen ? (idx + 1) : 0,
       closeLightbox: () => this.setState({ lightboxIndex: null }),
@@ -256,7 +327,6 @@ class Component extends DCLogic {
     };
   }
 }
-
 </script>
 </body>
 </html>

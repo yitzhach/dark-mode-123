@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<meta name="theme-color" content="#EDEAE3">
+<link rel="icon" href="./favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="manifest" href="./site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600;6..96,700;6..96,800&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&amp;family=Archivo:wght@400;500;600;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+  html{scroll-behavior:smooth}
+  body{margin:0;background:#EDEAE3;color:#1B1917;font-family:'Archivo',sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+  a{color:#1B1917;text-decoration:none}
+  a:hover{color:var(--accent,#A34A24)}
+  ::selection{background:var(--accent,#A34A24);color:#F5F3EE}
+  [data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+  [data-reveal].is-visible{opacity:1;transform:none}
+  @media (hover:none){
+    .m-press{transition:transform .18s ease}
+    .m-press:active{transform:scale(.985)}
+    .m-tap:active{border-color:var(--accent,#A34A24) !important;color:var(--accent,#A34A24) !important}
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0ms !important;transition-duration:.01ms !important}
+    [data-reveal]{opacity:1 !important;transform:none !important}
+  }
+  @media (max-width:760px){
+    .m-nav{height:60px !important}
+    .m-tap{min-height:44px !important;display:inline-flex !important;align-items:center;justify-content:center}
+    .m-pad{padding-left:max(20px,env(safe-area-inset-left)) !important;padding-right:max(20px,env(safe-area-inset-right)) !important}
+    .m-h1{font-size:clamp(44px,13.5vw,66px) !important}
+    .m-hero-img{height:auto !important;aspect-ratio:7/6}
+    .m-stage{grid-template-columns:1fr !important;gap:22px !important;padding:38px 0 !important}
+    .m-stage-img{height:auto !important;aspect-ratio:4/3}
+    .m-stage-num{font-size:44px !important}
+    .m-rail{display:none !important}
+    .m-body{grid-template-columns:1fr !important}
+    .m-spec{flex-wrap:wrap !important;gap:8px 18px !important}
+    .m-footer{flex-direction:column !important;gap:8px !important;padding-bottom:max(14px,env(safe-area-inset-bottom)) !important}
+    .m-burger{display:flex !important}
+    .m-navlinks{display:none !important}
+    .m-navlinks.m-open{display:flex !important;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0 !important;background:rgba(237,234,227,.98);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #D6CFC2;box-shadow:0 22px 46px rgba(27,25,23,.14);padding:6px 20px 16px}
+    .m-navlinks.m-open > *{padding:15px 2px !important;border-bottom:1px solid #E2DBCD !important;font-size:15px !important;width:100%;box-sizing:border-box}
+    .m-navlinks.m-open > a:last-child{margin-top:12px;text-align:center;border-bottom:none !important;padding:16px 0 !important}
+    .m-fab-top{display:flex !important}
+  }
+  @media (min-width:761px) and (max-width:1024px){
+    .m-pad{padding-left:32px !important;padding-right:32px !important}
+    .m-nav{padding:0 32px !important}
+    .m-navlinks{gap:22px !important}
+    .m-hero-img{height:440px !important}
+    .m-stage-img{height:360px !important}
+    .m-rail{display:none !important}
+    .m-body{grid-template-columns:1fr !important}
+  }
+</style>
+</helmet>
+
+<div style="min-height:100vh">
+
+  <nav data-screen-label="Nav" class="m-pad m-nav" style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:72px;background:rgba(237,234,227,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #D6CFC2;box-shadow:{{ navShadow }};transform:{{ navTransform }};transition:box-shadow .35s ease,transform .3s ease">
+    <a href="index.html#top" style="display:flex;align-items:baseline;gap:10px;color:#1B1917">
+      <span style="font:700 20px/1 'Bodoni Moda',serif;text-transform:uppercase;letter-spacing:.015em">Isaac<span style="margin:0 .05em"> </span>Anderson</span>
+      <span style="position:relative;top:-4px;display:inline-flex;align-items:center;height:21px;box-sizing:border-box;font:600 12.6px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);letter-spacing:.08em;border:1px solid var(--accent,#A34A24);padding:0 8px;line-height:1">ART</span>
+    </a>
+    <button type="button" onClick="{{ toggleNav }}" aria-label="Menu" aria-expanded="{{ navOpen }}" class="m-burger" style="display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:44px;height:44px;background:none;border:none;cursor:pointer;padding:0"><span style="display:block;width:24px;height:2px;background:#1B1917"></span><span style="display:block;width:24px;height:2px;background:#1B1917"></span><span style="display:block;width:24px;height:2px;background:#1B1917"></span></button>
+    <div class="m-navlinks {{ navOpenCls }}" onClick="{{ closeNav }}" style="display:flex;align-items:center;gap:38px">
+      <a href="commissions.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">01</span>Commissions</a>
+      <a href="index.html#works" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">02</span>Works</a>
+      <a href="process.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;color:var(--accent,#A34A24);border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">03</span>Process</a>
+      <a href="about.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">04</span>About</a>
+      <a href="index.html#inquire" style="background:var(--accent,#A34A24);color:#F5F3EE;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:13px 26px;transition:background .25s ease" style-hover="background:#1B1917;color:#F5F3EE">Inquire</a>
+    </div>
+  </nav>
+
+  <header data-screen-label="Process header" class="m-pad" style="max-width:1240px;margin:0 auto;padding:56px 48px 34px;box-sizing:border-box">
+    <a href="index.html#top" style="font:500 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C;display:inline-flex;align-items:center;gap:8px">← Index</a>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-top:22px">
+      <div style="min-width:0">
+        <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--accent,#A34A24);margin-bottom:14px">Process — No. 03</div>
+        <h1 class="m-h1" style="font:700 clamp(48px,7vw,88px)/0.98 'Bodoni Moda',serif;text-transform:uppercase;letter-spacing:.005em;margin:0">Process</h1>
+      </div>
+      <div style="font:400 13px 'IBM Plex Mono',monospace;color:#5C564C;padding-bottom:10px;flex:none">Five stages</div>
+    </div>
+    <p style="font:400 16px/1.65 'Archivo',sans-serif;color:#4A443C;max-width:600px;margin:22px 0 0;text-wrap:pretty">Five stages, in order. The first two are mine to control; the last three belong partly to the material. That division is the whole subject of the work.</p>
+  </header>
+
+  <section data-screen-label="Process hero" class="m-pad" style="max-width:1240px;margin:0 auto;padding:0 48px 12px;box-sizing:border-box">
+    <div class="m-hero-img" style="position:relative;height:560px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
+      <image-slot id="process-hero" shape="rect" loading="eager" swap placeholder="Studio — wide shot, work in progress"></image-slot>
+      <div class="m-capL" style="position:absolute;left:22px;bottom:22px;background:rgba(237,234,227,.94);border:1px solid #1B1917;padding:9px 14px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em">Studio — Southern California / Southern Kentucky</div>
+    </div>
+  </section>
+
+  <section data-screen-label="Stages" class="m-pad" style="max-width:1240px;margin:0 auto;padding:40px 48px 24px;box-sizing:border-box">
+    <div class="m-body" style="display:grid;grid-template-columns:120px 1fr;gap:0 48px;align-items:start">
+      <div class="m-rail" style="position:sticky;top:112px;font:500 11px/2.4 'IBM Plex Mono',monospace;color:#5C564C;letter-spacing:.08em;border-top:1px solid #1B1917;padding-top:14px">
+        <a href="#s01" style="display:block;color:inherit">01 Material</a>
+        <a href="#s02" style="display:block;color:inherit">02 Formwork</a>
+        <a href="#s03" style="display:block;color:inherit">03 Cast</a>
+        <a href="#s04" style="display:block;color:inherit">04 Cure</a>
+        <a href="#s05" style="display:block;color:inherit">05 Finish</a>
+      </div>
+      <div>
+        <article id="s01" data-reveal="" data-screen-label="Stage 01" class="m-stage" style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;padding:14px 0 56px;border-top:1px solid #D6CFC2;scroll-margin-top:100px">
+          <div>
+            <div class="m-stage-num" style="font:700 62px/1 'Bodoni Moda',serif;color:var(--accent,#A34A24);margin-bottom:16px">01</div>
+            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Material</div>
+            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">Nothing arrives pre-coloured.</h2>
+            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Portland cement, casting plaster, pigment, and aggregate gathered from [site] — mixed by hand in batches small enough to pour in one pass. Pigment goes in wet, which means it never lands quite where it was put.</p>
+            <div class="m-spec" style="display:flex;gap:26px;border-top:1px solid #D6CFC2;padding-top:14px;margin-top:22px;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
+              <span>Cement · plaster</span><span>Raw pigment</span><span>Mixed by hand</span>
+            </div>
+          </div>
+          <div class="m-stage-img" style="height:420px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
+            <image-slot id="process-01-material" shape="rect" swap placeholder="Material — dry mix, pigment, aggregate"></image-slot>
+          </div>
+        </article>
+
+        <article id="s02" data-reveal="" data-screen-label="Stage 02" class="m-stage" style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;padding:14px 0 56px;border-top:1px solid #D6CFC2;scroll-margin-top:100px">
+          <div class="m-stage-img" style="height:420px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
+            <image-slot id="process-02-formwork" shape="rect" swap placeholder="Formwork — steel armature, sealed forms"></image-slot>
+          </div>
+          <div>
+            <div class="m-stage-num" style="font:700 62px/1 'Bodoni Moda',serif;color:var(--accent,#A34A24);margin-bottom:16px">02</div>
+            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Formwork</div>
+            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">The part I actually control.</h2>
+            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Steel cut and welded to size, forms built and sealed by hand. Tolerances are tight here because everything after this stage refuses instruction. Order is front-loaded on purpose.</p>
+            <div class="m-spec" style="display:flex;gap:26px;border-top:1px solid #D6CFC2;padding-top:14px;margin-top:22px;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
+              <span>Welded steel</span><span>Sealed forms</span><span>±[tolerance]</span>
+            </div>
+          </div>
+        </article>
+
+        <article id="s03" data-reveal="" data-screen-label="Stage 03" class="m-stage" style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;padding:14px 0 56px;border-top:1px solid #D6CFC2;scroll-margin-top:100px">
+          <div>
+            <div class="m-stage-num" style="font:700 62px/1 'Bodoni Moda',serif;color:var(--accent,#A34A24);margin-bottom:16px">03</div>
+            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Cast</div>
+            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">One pour. No second attempt.</h2>
+            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Poured in a single continuous pass, vibrated out by hand. Air finds its own routes through the form. From the moment the pour begins, every decision is permanent.</p>
+            <div class="m-spec" style="display:flex;gap:26px;border-top:1px solid #D6CFC2;padding-top:14px;margin-top:22px;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
+              <span>Single pass</span><span>Hand-vibrated</span><span>No retouching</span>
+            </div>
+          </div>
+          <div class="m-stage-img" style="height:420px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
+            <image-slot id="process-03-cast" shape="rect" swap placeholder="Cast — the pour, wet surface"></image-slot>
+          </div>
+        </article>
+
+        <article id="s04" data-reveal="" data-screen-label="Stage 04" class="m-stage" style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;padding:14px 0 56px;border-top:1px solid #D6CFC2;scroll-margin-top:100px">
+          <div class="m-stage-img" style="height:420px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
+            <image-slot id="sculptural-5" src="images/sculptural-5.webp" shape="rect" swap placeholder="Cure — surface under damp cloth"></image-slot>
+          </div>
+          <div>
+            <div class="m-stage-num" style="font:700 62px/1 'Bodoni Moda',serif;color:var(--accent,#A34A24);margin-bottom:16px">04</div>
+            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Cure</div>
+            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">Two weeks in the dark, and it keeps moving.</h2>
+            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Slow hydration under damp cloth. Hairlines open, pigment migrates toward the edges, and the surface goes on changing after the form comes off. This is the entropy half of the title — and the half I like.</p>
+            <div class="m-spec" style="display:flex;gap:26px;border-top:1px solid #D6CFC2;padding-top:14px;margin-top:22px;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
+              <span>[14] days</span><span>Damp cure</span><span>Unpredictable</span>
+            </div>
+          </div>
+        </article>
+
+        <article id="s05" data-reveal="" data-screen-label="Stage 05" class="m-stage" style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;padding:14px 0 56px;border-top:1px solid #D6CFC2;border-bottom:1px solid #D6CFC2;scroll-margin-top:100px">
+          <div>
+            <div class="m-stage-num" style="font:700 62px/1 'Bodoni Moda',serif;color:var(--accent,#A34A24);margin-bottom:16px">05</div>
+            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Finish</div>
+            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">Ground back, then left open.</h2>
+            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Faces are ground and honed by hand until the aggregate reads, then left unsealed. The piece goes on ageing in whatever room it lives in — slowly, and not to my schedule.</p>
+            <div class="m-spec" style="display:flex;gap:26px;border-top:1px solid #D6CFC2;padding-top:14px;margin-top:22px;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
+              <span>Hand-ground</span><span>Unsealed</span><span>Still ageing</span>
+            </div>
+          </div>
+          <div class="m-stage-img" style="height:420px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
+            <image-slot id="object-014" src="images/object-014.webp" shape="rect" swap placeholder="Finish — honed face, gallery-grade"></image-slot>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section data-reveal="" data-screen-label="Process close" class="m-pad" style="max-width:1240px;margin:0 auto;padding:20px 48px 96px;box-sizing:border-box">
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:32px">
+      <p style="font:400 clamp(24px,3.2vw,38px)/1.28 'Newsreader',serif;font-style:italic;margin:0;max-width:720px;text-wrap:pretty">Order is what I bring. Entropy is what finishes the work.</p>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <a href="index.html#works" class="m-tap" style="border:1px solid #1B1917;padding:13px 24px;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;transition:background .25s,color .25s" style-hover="background:#1B1917;color:#F5F3EE">See the works</a>
+        <a href="index.html#inquire" class="m-tap" style="background:var(--accent,#A34A24);color:#F5F3EE;padding:13px 24px;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;transition:background .25s" style-hover="background:#1B1917;color:#F5F3EE">Commission a piece</a>
+      </div>
+    </div>
+  </section>
+
+  <footer data-screen-label="Footer" style="border-top:1px solid #D6CFC2">
+    <div class="m-pad m-footer" style="max-width:1240px;margin:0 auto;padding:30px 48px;box-sizing:border-box;display:flex;justify-content:space-between;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
+      <span>© {{ copyrightYear }} Isaac Anderson Art</span>
+      <span>Process — No. 03</span>
+    </div>
+  </footer>
+
+  <button type="button" class="m-fab-top" onClick="{{ scrollTop }}" aria-label="Back to top" style="display:none;position:fixed;left:calc(16px + env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;background:#F5F3EE;color:#1B1917;border:1px solid #1B1917;font:600 15px 'IBM Plex Mono',monospace;width:44px;height:44px;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 12px 28px rgba(27,25,23,.18);opacity:{{ topOpacity }};transform:{{ topTransform }};transition:opacity .3s ease,transform .3s ease;pointer-events:{{ topPointer }}">↑</button>
+
+</div>
+
+<div style="display:none;width:0;height:0;overflow:hidden"><x-import component-from-global-scope="image-slot" from="./image-slot.js?v=20260731b" id="loader-slot" hint-size="0,0"></x-import></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#A34A24&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#A34A24&quot;,&quot;#6E4B2A&quot;,&quot;#2F4636&quot;,&quot;#1B1917&quot;]}}">
+class Component extends DCLogic {
+  state = { scrolled: false, navOpen: false, navHidden: false, topVisible: false };
+
+  componentDidMount() {
+    this.applyAccent();
+    this._onScroll = () => {
+      const y = window.scrollY;
+      const sc = y > 8;
+      if (sc !== this.state.scrolled) this.setState({ scrolled: sc });
+      const isMobile = window.matchMedia && window.matchMedia('(max-width:760px)').matches;
+      if (isMobile) {
+        const dy = y - (this._lastY ?? y);
+        let navHidden = this.state.navHidden;
+        if (y < 80) navHidden = false;
+        else if (dy > 4) navHidden = true;
+        else if (dy < -4) navHidden = false;
+        const topVisible = y > 300;
+        if (navHidden !== this.state.navHidden || topVisible !== this.state.topVisible) {
+          this.setState({ navHidden, topVisible });
+        }
+      } else if (this.state.navHidden || this.state.topVisible) {
+        this.setState({ navHidden: false, topVisible: false });
+      }
+      this._lastY = y;
+    };
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+    this._io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('is-visible'); });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+    document.querySelectorAll('[data-reveal]').forEach((el) => this._io.observe(el));
+  }
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this._onScroll);
+    if (this._io) this._io.disconnect();
+  }
+  componentDidUpdate() { this.applyAccent(); }
+  applyAccent() { document.body.style.setProperty('--accent', this.props.accent ?? '#A34A24'); }
+
+  renderVals() {
+    return {
+      copyrightYear: new Date().getFullYear(),
+      navShadow: this.state.scrolled ? '0 10px 32px rgba(27,25,23,.10)' : 'none',
+      navOpen: this.state.navOpen,
+      navOpenCls: this.state.navOpen ? 'm-open' : '',
+      toggleNav: () => this.setState((st) => { const open = !st.navOpen; document.body.style.overflow = open ? 'hidden' : ''; return { navOpen: open }; }),
+      closeNav: () => { if (this.state.navOpen) { document.body.style.overflow = ''; this.setState({ navOpen: false }); } },
+      navTransform: this.state.navHidden ? 'translateY(-100%)' : 'translateY(0)',
+      topOpacity: this.state.topVisible ? 1 : 0,
+      topTransform: this.state.topVisible ? 'translateY(0)' : 'translateY(14px)',
+      topPointer: this.state.topVisible ? 'auto' : 'none',
+      scrollTop: () => window.scrollTo({ top: 0, behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches) ? 'auto' : 'smooth' }),
+    };
+  }
+}
+</script>
+</body>
+</html>
