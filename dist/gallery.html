@@ -72,8 +72,8 @@
     <div class="m-navlinks {{ navOpenCls }}" onClick="{{ closeNav }}" style="display:flex;align-items:center;gap:38px">
       <a href="commissions.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">01</span>Commissions</a>
       <a href="index.html#works" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;color:var(--accent,#A34A24);border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">02</span>Works</a>
-      <span aria-disabled="true" title="Coming soon" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;color:#5C564C;padding:6px 0;cursor:default"><span style="font:500 10px 'IBM Plex Mono',monospace;margin-right:6px">03</span>Process</span>
-      <span aria-disabled="true" title="Coming soon" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;color:#5C564C;padding:6px 0;cursor:default"><span style="font:500 10px 'IBM Plex Mono',monospace;margin-right:6px">04</span>About</span>
+      <a href="process.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">03</span>Process</a>
+      <a href="about.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">04</span>About</a>
       <a href="index.html#inquire" style="background:var(--accent,#A34A24);color:#F5F3EE;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:13px 26px;transition:background .25s ease" style-hover="background:#1B1917;color:#F5F3EE">Inquire</a>
     </div>
   </nav>
@@ -99,7 +99,7 @@
     <div class="m-grid-3" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px">
       <sc-for list="{{ works }}" as="w" hint-placeholder-count="9">
         <div onClick="{{ w.onOpen }}" class="m-press" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="{{ w.slot }}" src="{{ w.src }}" hires-target="{{ w.fullSlot }}" hires-maxdim="2400" shape="rect" placeholder="{{ w.placeholder }}"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="{{ w.slot }}" src="{{ w.src }}" hires-target="{{ w.fullSlot }}" hires-maxdim="2400" swap swap-scope=".m-press" shape="rect" placeholder="{{ w.placeholder }}"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">{{ w.no }}</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">{{ w.collection }}</span>

@@ -476,6 +476,7 @@
     catch (e) { return false; }
   };
   const SWAP_MOVE = 12;   // px of finger travel that reads as a scroll, not a press
+  const SWAP_PRESS = 200; // ms held before a press counts as a swap, not a tap
 
   // ── Custom element ──────────────────────────────────────────────────────
   const stylesheet =
@@ -1153,19 +1154,50 @@
           const t = e.touches && e.touches[0];
           this._touchY = t ? t.clientY : 0;
           this._touchX = t ? t.clientX : 0;
+          this._pressAt = Date.now();
+          this._pressSwapped = false;
+          this._eatClick = false;      // never inherit the last gesture's flag
+          clearTimeout(this._eatT);
           this._swapTo(true);
+          if (this.hasAttribute('data-swap-on')) this._pressSwapped = true;
         };
         this._onTouchMove = (e) => {
           const t = e.touches && e.touches[0];
           if (!t) return;
           if (Math.abs(t.clientY - this._touchY) > SWAP_MOVE ||
-              Math.abs(t.clientX - this._touchX) > SWAP_MOVE) this._swapTo(false);
+              Math.abs(t.clientX - this._touchX) > SWAP_MOVE) {
+            this._pressSwapped = false;   // a scroll never swallows the tap
+            this._swapTo(false);
+          }
         };
-        this._onTouchEnd = () => this._swapTo(false);
+        this._onTouchEnd = () => {
+          // A deliberate hold was a swap gesture, so the card's tap handler must
+          // not fire over the fade-back. A quick tap still opens the lightbox.
+          if (this._pressSwapped && Date.now() - this._pressAt > SWAP_PRESS) {
+            this._eatClick = true;
+            // The synthetic click lands within ~300ms; if it never comes (iOS
+            // long-press callout, cancelled gesture) the flag must not linger.
+            clearTimeout(this._eatT);
+            this._eatT = setTimeout(() => { this._eatClick = false; }, 400);
+          }
+          this._swapTo(false);
+        };
+        this._onTouchCancel = () => {
+          this._pressSwapped = false;
+          this._swapTo(false);
+        };
+        this._onScopeClick = (e) => {
+          if (!this._eatClick) return;
+          this._eatClick = false;
+          clearTimeout(this._eatT);
+          e.preventDefault();
+          e.stopPropagation();
+        };
         this._touchScopeEl.addEventListener('touchstart', this._onTouchStart, { passive: true });
         this._touchScopeEl.addEventListener('touchmove', this._onTouchMove, { passive: true });
         this._touchScopeEl.addEventListener('touchend', this._onTouchEnd, { passive: true });
-        this._touchScopeEl.addEventListener('touchcancel', this._onTouchEnd, { passive: true });
+        this._touchScopeEl.addEventListener('touchcancel', this._onTouchCancel, { passive: true });
+        this._touchScopeEl.addEventListener('click', this._onScopeClick, true);
       }
       load();
       this._render();
@@ -1180,12 +1212,14 @@
       this.removeEventListener('drop', this);
       if (this._ro) { this._ro.disconnect(); this._ro = null; }
       clearTimeout(this._holdT);
+      clearTimeout(this._eatT);
       if (this._touchOn) {
         this._touchOn = false;
         this._touchScopeEl.removeEventListener('touchstart', this._onTouchStart);
         this._touchScopeEl.removeEventListener('touchmove', this._onTouchMove);
         this._touchScopeEl.removeEventListener('touchend', this._onTouchEnd);
-        this._touchScopeEl.removeEventListener('touchcancel', this._onTouchEnd);
+        this._touchScopeEl.removeEventListener('touchcancel', this._onTouchCancel);
+        this._touchScopeEl.removeEventListener('click', this._onScopeClick, true);
       }
       if (this._hoverOn) {
         this._hoverOn = false;

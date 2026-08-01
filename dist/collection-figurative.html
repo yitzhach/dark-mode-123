@@ -74,8 +74,8 @@
     <div class="m-navlinks {{ navOpenCls }}" onClick="{{ closeNav }}" style="display:flex;align-items:center;gap:38px">
       <a href="commissions.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">01</span>Commissions</a>
       <a href="index.html#works" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;color:var(--accent,#A34A24);border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">02</span>Works</a>
-      <span aria-disabled="true" title="Coming soon" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;color:#5C564C;padding:6px 0;cursor:default"><span style="font:500 10px 'IBM Plex Mono',monospace;margin-right:6px">03</span>Process</span>
-      <span aria-disabled="true" title="Coming soon" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;color:#5C564C;padding:6px 0;cursor:default"><span style="font:500 10px 'IBM Plex Mono',monospace;margin-right:6px">04</span>About</span>
+      <a href="process.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">03</span>Process</a>
+      <a href="about.html" style="font:500 13px 'Archivo',sans-serif;letter-spacing:.02em;padding:6px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s" style-hover="border-bottom:1px solid var(--accent,#A34A24)"><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24);margin-right:6px">04</span>About</a>
       <a href="index.html#inquire" style="background:var(--accent,#A34A24);color:#F5F3EE;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:13px 26px;transition:background .25s ease" style-hover="background:#1B1917;color:#F5F3EE">Inquire</a>
     </div>
   </nav>
@@ -95,84 +95,84 @@
   <section data-screen-label="Works grid" class="m-pad" style="max-width:1240px;margin:0 auto;padding:24px 48px 96px;box-sizing:border-box">
     <div class="m-grid-3" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px">
               <div data-i="0" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-1" hires-target="figurative-1-hi" hires-maxdim="2400" shape="rect" placeholder="Figurative — piece 1" src="images/figurative-1.webp"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-1" hires-target="figurative-1-hi" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Figurative — piece 1" src="images/figurative-1.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 001</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
         <div data-i="1" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-2" hires-target="figurative-2-hi" hires-maxdim="2400" shape="rect" placeholder="Figurative — piece 2" src="images/figurative-2.webp"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-2" hires-target="figurative-2-hi" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Figurative — piece 2" src="images/figurative-2.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 002</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
         <div data-i="2" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-3" hires-target="figurative-3-hi" hires-maxdim="2400" shape="rect" placeholder="Figurative — piece 3" src="images/figurative-3.webp"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-3" hires-target="figurative-3-hi" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Figurative — piece 3" src="images/figurative-3.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 003</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
         <div data-i="3" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-4" hires-target="figurative-4-hi" hires-maxdim="2400" shape="rect" placeholder="Figurative — piece 4" src="images/figurative-4.webp"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-4" hires-target="figurative-4-hi" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Figurative — piece 4" src="images/figurative-4.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 004</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
         <div data-i="4" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-5" hires-target="figurative-5-hi" hires-maxdim="2400" shape="rect" placeholder="Figurative — piece 5" src="images/figurative-5.webp"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-5" hires-target="figurative-5-hi" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Figurative — piece 5" src="images/figurative-5.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 005</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
         <div data-i="5" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-6" hires-target="figurative-6-hi" hires-maxdim="2400" shape="rect" placeholder="Figurative — piece 6" src="images/figurative-6.webp" data-hi-src="images/figurative-6-hi.webp"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-6" hires-target="figurative-6-hi" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Figurative — piece 6" src="images/figurative-6.webp" data-hi-src="images/figurative-6-hi.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 006</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
         <div data-i="6" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-7" hires-target="figurative-7-hi" hires-maxdim="2400" shape="rect" placeholder="Figurative — piece 7" src="images/figurative-7.webp"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-7" hires-target="figurative-7-hi" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Figurative — piece 7" src="images/figurative-7.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 007</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
         <div data-i="7" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-8" hires-target="figurative-8-hi" hires-maxdim="2400" shape="rect" placeholder="Figurative — piece 8" src="images/figurative-8.webp"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-8" hires-target="figurative-8-hi" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Figurative — piece 8" src="images/figurative-8.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 008</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
         <div data-i="8" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-9" hires-target="figurative-9-hi" hires-maxdim="2400" shape="rect" placeholder="Figurative — piece 9"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-9" hires-target="figurative-9-hi" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Figurative — piece 9"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 009</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
         <div data-i="9" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-10" hires-target="figurative-10-hi" hires-maxdim="2400" shape="rect" placeholder="Figurative — piece 10" src="images/figurative-10.webp"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-10" hires-target="figurative-10-hi" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Figurative — piece 10" src="images/figurative-10.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 010</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
         <div data-i="10" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-11" hires-target="figurative-11-hi" hires-maxdim="2400" shape="rect" placeholder="Figurative — piece 11" src="images/figurative-11.webp"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-11" hires-target="figurative-11-hi" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Figurative — piece 11" src="images/figurative-11.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 011</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
           </div>
         </div>
         <div data-i="11" class="m-press" onClick="{{ openFromEvent }}" style="display:flex;flex-direction:column;border:1px solid #D6CFC2;background:#F5F3EE;cursor:pointer;transition:border-color .3s ease,transform .3s ease,box-shadow .3s ease" style-hover="border-color:#1B1917;transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,25,23,.12)">
-          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-12" hires-target="figurative-12-hi" hires-maxdim="2400" shape="rect" placeholder="Figurative — piece 12" src="images/figurative-12.webp"></image-slot></div>
+          <div class="m-card-img" style="aspect-ratio:4/5;min-width:0;overflow:hidden;border-bottom:1px solid #D6CFC2"><image-slot id="figurative-12" hires-target="figurative-12-hi" hires-maxdim="2400" swap swap-scope="[data-i]" shape="rect" placeholder="Figurative — piece 12" src="images/figurative-12.webp"></image-slot></div>
           <div style="padding:18px 20px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
             <span style="font:500 13px 'IBM Plex Mono',monospace;color:var(--accent,#A34A24)">No. 012</span>
             <span style="font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">[Title, size, year]</span>
