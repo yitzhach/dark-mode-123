@@ -132,40 +132,46 @@
         <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--accent,#A34A24);margin-bottom:16px">Inquire</div>
         <h2 style="font:400 33px/1.2 'Newsreader',serif;letter-spacing:-.015em;margin:0 0 16px">Start a commission</h2>
         <p style="font:400 14.5px/1.7 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">A few details. One conversation. From there, the studio will respond within two business days with thoughtful questions, project timing, and—if the project is a good fit—an initial concept direction.</p>
-        <div style="font:400 12px/2.1 'IBM Plex Mono',monospace;color:#5C564C;margin-top:30px;border-top:1px solid #D6CFC2;padding-top:20px"><a href="mailto:studio@[domain]" style="color: inherit;">email: isaac@[domain]</a><br>Studio — Southern California &amp; Appalachia<br><a href="https://www.instagram.com/isaacandersonart/">Instagram</a></div>
+        <div style="font:400 12px/2.1 'IBM Plex Mono',monospace;color:#5C564C;margin-top:30px;border-top:1px solid #D6CFC2;padding-top:20px"><a href="mailto:bobdylan2000@gmail.com" style="color: inherit;">bobdylan2000@gmail.com</a><br>Studio — Southern California &amp; Appalachia<br><a href="https://www.instagram.com/isaacandersonart/">Instagram</a></div>
       </div>
       <sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
-        <form onSubmit="{{ submit }}" style="display:flex;flex-direction:column;gap:18px">
+<form onSubmit="{{ submit }}" style="display:flex;flex-direction:column;gap:18px">
+          <input type="hidden" name="_subject" value="New commission inquiry — Commissions">
+          <input type="hidden" name="source" value="Commissions page">
+          <input type="text" name="_gotcha" tabIndex="-1" autoComplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
           <div class="m-form2" style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
             <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Name
-              <input type="text" placeholder="Full name" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+              <input type="text" name="name" required="required" placeholder="Full name" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
             </label>
             <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Email
-              <input type="email" placeholder="you@email.com" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+              <input type="email" name="email" required="required" placeholder="you@email.com" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
             </label>
           </div>
           <div class="m-form3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px">
-            <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Phone <span style="text-transform:none;letter-spacing:0">(optional)</span>
-              <input type="tel" placeholder="+1 555 000 0000" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+            <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C"><span style="display:flex;align-items:baseline;gap:4px">Phone <span style="text-transform:none;letter-spacing:0;font-size:9px">(optional)</span></span>
+              <input type="tel" name="phone" placeholder="+1 555 000 0000" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
             </label>
             <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Project type
-              <select style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+              <select name="project_type" required="required" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
                 <option>Private Collection</option><option>Hospitality</option><option>Lobby / Commercial</option><option>Other</option>
               </select>
             </label>
             <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Timeline
-              <select style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+              <select name="timeline" required="required" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
                 <option>Within 3 months</option><option>3–6 months</option><option>6+ months</option><option>Exploring</option>
               </select>
             </label>
           </div>
           <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Project location
-            <input type="text" placeholder="City, country" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+            <input type="text" name="location" placeholder="City, country" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
           </label>
           <label style="display:flex;flex-direction:column;gap:8px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:#5C564C">Anything else <span style="text-transform:none;letter-spacing:0">(optional)</span>
-            <input type="text" placeholder="Space, scale, or the feeling you're after" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
+            <input type="text" name="message" placeholder="Space, scale, or the feeling you're after" style="font:400 14px 'Archivo',sans-serif;color:#1B1917;background:#EDEAE3;border:1px solid #D6CFC2;padding:13px 14px;transition:border-color .2s" style-focus="border-color:#1B1917">
           </label>
-          <button type="submit" class="m-submit" style="align-self:flex-start;background:var(--accent,#A34A24);color:#F5F3EE;border:none;cursor:pointer;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:13px 26px;margin-top:6px;transition:background .25s ease" style-hover="background:#1B1917">Send inquiry</button>
+          <sc-if value="{{ formError }}" hint-placeholder-val="{{ false }}">
+            <div style="font:500 11px 'IBM Plex Mono',monospace;color:#5C564C">Something went wrong sending that — <span style="color:var(--accent,#A34A24)">please try again.</span></div>
+          </sc-if>
+          <button type="submit" class="m-submit" disabled="{{ sending }}" style="align-self:flex-start;background:var(--accent,#A34A24);color:#F5F3EE;border:none;cursor:pointer;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;padding:13px 26px;margin-top:6px;transition:background .25s ease" style-hover="background:#1B1917">{{ submitLabel }}</button>
         </form>
       </sc-if>
       <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
@@ -201,7 +207,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#A34A24&quot;,&quot;options&quot;:[&quot;#A34A24&quot;,&quot;#5C6B5D&quot;,&quot;#41506B&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
 class Component extends DCLogic {
-  state = { scrolled: false, navOpen: false, navHidden: false, topVisible: false, sent: false };
+  state = { scrolled: false, navOpen: false, navHidden: false, topVisible: false, sent: false, sending: false, error: false };
 
   componentDidMount() {
     this.applyAccent();
@@ -250,7 +256,26 @@ class Component extends DCLogic {
       scrollTop: () => window.scrollTo({ top: 0, behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches) ? 'auto' : 'smooth' }),
       sent: this.state.sent,
       notSent: !this.state.sent,
-      submit: (e) => { e.preventDefault(); this.setState({ sent: true }); },
+      sending: this.state.sending,
+      formError: this.state.error,
+      submitLabel: this.state.sending ? 'Sending…' : 'Send inquiry',
+      submit: async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        if (form._gotcha.value) { this.setState({ sent: true }); return; }
+        this.setState({ sending: true, error: false });
+        try {
+          const res = await fetch('https://formspree.io/f/xaqrglpk', {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+            body: new FormData(form),
+          });
+          if (res.ok) this.setState({ sent: true, sending: false });
+          else this.setState({ sending: false, error: true });
+        } catch (err) {
+          this.setState({ sending: false, error: true });
+        }
+      },
     };
   }
 }
