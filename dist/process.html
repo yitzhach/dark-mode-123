@@ -95,47 +95,51 @@
 
   <section data-screen-label="Process hero" class="m-pad" style="max-width:1240px;margin:0 auto;padding:0 48px 12px;box-sizing:border-box">
     <div class="m-hero-img" style="position:relative;height:560px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
-      <image-slot id="process-hero" shape="rect" loading="eager" swap placeholder="Studio — wide shot, work in progress"></image-slot>
-      <div class="m-capL" style="position:absolute;left:22px;bottom:22px;background:rgba(237,234,227,.94);border:1px solid #1B1917;padding:9px 14px;font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.1em">Studio — Southern California / Southern Kentucky</div>
+      <sc-for list="{{ heroSlides }}" as="slide" hint-placeholder-count="4">
+        <div style="position:absolute;inset:0;opacity:{{ slide.op }};z-index:{{ slide.z }};transition:opacity 1.25s ease">
+          <image-slot id="{{ slide.id }}" src="{{ slide.src }}" shape="rect" loading="{{ slide.loading }}" placeholder="{{ slide.placeholder }}"></image-slot>
+        </div>
+      </sc-for>
+      
     </div>
   </section>
 
   <section data-screen-label="Stages" class="m-pad" style="max-width:1240px;margin:0 auto;padding:40px 48px 24px;box-sizing:border-box">
     <div class="m-body" style="display:grid;grid-template-columns:120px 1fr;gap:0 48px;align-items:start">
       <div class="m-rail" style="position:sticky;top:112px;font:500 11px/2.4 'IBM Plex Mono',monospace;color:#5C564C;letter-spacing:.08em;border-top:1px solid #1B1917;padding-top:14px">
-        <a href="#s01" style="display:block;color:inherit">01 Material</a>
-        <a href="#s02" style="display:block;color:inherit">02 Formwork</a>
-        <a href="#s03" style="display:block;color:inherit">03 Cast</a>
-        <a href="#s04" style="display:block;color:inherit">04 Cure</a>
-        <a href="#s05" style="display:block;color:inherit">05 Finish</a>
+        <a href="#s01" style="display:block;color:inherit">01 Surface</a>
+        <a href="#s02" style="display:block;color:inherit">02 Layering</a>
+        <a href="#s03" style="display:block;color:inherit">03 Color</a>
+        <a href="#s04" style="display:block;color:inherit">04 Erosion</a>
+        <a href="#s05" style="display:block;color:inherit">05 Finished</a>
       </div>
       <div>
         <article id="s01" data-reveal="" data-screen-label="Stage 01" class="m-stage" style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;padding:14px 0 56px;border-top:1px solid #D6CFC2;scroll-margin-top:100px">
           <div>
             <div class="m-stage-num" style="font:700 62px/1 'Bodoni Moda',serif;color:var(--accent,#A34A24);margin-bottom:16px">01</div>
-            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Material</div>
-            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">Nothing arrives pre-coloured.</h2>
-            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Portland cement, casting plaster, pigment, and aggregate gathered from [site] — mixed by hand in batches small enough to pour in one pass. Pigment goes in wet, which means it never lands quite where it was put.</p>
+            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Building the Surface</div>
+            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">Foundation: preparing the surface.</h2>
+            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Custom wood panels are prepared and layered with gypsum, lime, and cementitious plasters, creating the foundation for each piece and establishing the physical depth of the work.</p>
             <div class="m-spec" style="display:flex;gap:26px;border-top:1px solid #D6CFC2;padding-top:14px;margin-top:22px;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
-              <span>Cement · plaster</span><span>Raw pigment</span><span>Mixed by hand</span>
+              <span>Wood panel</span><span>Gypsum · lime</span><span>Cementitious plaster</span>
             </div>
           </div>
           <div class="m-stage-img" style="height:420px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
-            <image-slot id="process-01-material" shape="rect" swap placeholder="Material — dry mix, pigment, aggregate"></image-slot>
+            <image-slot id="process-01-material" src="images/process-01-material.webp" shape="rect" swap="" placeholder="Raw panel — bare wood before plaster"></image-slot>
           </div>
         </article>
 
         <article id="s02" data-reveal="" data-screen-label="Stage 02" class="m-stage" style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;padding:14px 0 56px;border-top:1px solid #D6CFC2;scroll-margin-top:100px">
           <div class="m-stage-img" style="height:420px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
-            <image-slot id="process-02-formwork" shape="rect" swap placeholder="Formwork — steel armature, sealed forms"></image-slot>
+            <image-slot id="process-02-formwork" src="images/process-02-formwork.webp" shape="rect" swap="" placeholder="Applying plaster — successive layers"></image-slot>
           </div>
           <div>
             <div class="m-stage-num" style="font:700 62px/1 'Bodoni Moda',serif;color:var(--accent,#A34A24);margin-bottom:16px">02</div>
-            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Formwork</div>
-            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">The part I actually control.</h2>
-            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Steel cut and welded to size, forms built and sealed by hand. Tolerances are tight here because everything after this stage refuses instruction. Order is front-loaded on purpose.</p>
+            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Layering &amp; Material</div>
+            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">A surface that records its own making.</h2>
+            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Successive layers of mineral-based materials are applied, carved, and rebuilt. Each addition and subtraction creates a stratified surface that records the history of its own making.</p>
             <div class="m-spec" style="display:flex;gap:26px;border-top:1px solid #D6CFC2;padding-top:14px;margin-top:22px;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
-              <span>Welded steel</span><span>Sealed forms</span><span>±[tolerance]</span>
+              <span>Mineral layers</span><span>Carved</span><span>Rebuilt</span>
             </div>
           </div>
         </article>
@@ -143,29 +147,29 @@
         <article id="s03" data-reveal="" data-screen-label="Stage 03" class="m-stage" style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;padding:14px 0 56px;border-top:1px solid #D6CFC2;scroll-margin-top:100px">
           <div>
             <div class="m-stage-num" style="font:700 62px/1 'Bodoni Moda',serif;color:var(--accent,#A34A24);margin-bottom:16px">03</div>
-            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Cast</div>
-            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">One pour. No second attempt.</h2>
-            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Poured in a single continuous pass, vibrated out by hand. Air finds its own routes through the form. From the moment the pour begins, every decision is permanent.</p>
+            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Color &amp; Light</div>
+            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">Pigment worked in, with metal catching light.</h2>
+            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Hand-mixed pigments are worked directly into the plaster, while subtle copper or brass gilding catches changing light, revealing new depth and texture as the surface evolves.</p>
             <div class="m-spec" style="display:flex;gap:26px;border-top:1px solid #D6CFC2;padding-top:14px;margin-top:22px;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
-              <span>Single pass</span><span>Hand-vibrated</span><span>No retouching</span>
+              <span>Hand-mixed pigment</span><span>Copper gilding</span><span>Shifts with light</span>
             </div>
           </div>
           <div class="m-stage-img" style="height:420px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
-            <image-slot id="process-03-cast" shape="rect" swap placeholder="Cast — the pour, wet surface"></image-slot>
+            <image-slot id="process-03-cast" src="images/process-03-cast.webp" shape="rect" swap="" placeholder="Pigment and copper worked into the surface"></image-slot>
           </div>
         </article>
 
         <article id="s04" data-reveal="" data-screen-label="Stage 04" class="m-stage" style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;padding:14px 0 56px;border-top:1px solid #D6CFC2;scroll-margin-top:100px">
           <div class="m-stage-img" style="height:420px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
-            <image-slot id="sculptural-5" src="images/sculptural-5.webp" shape="rect" swap placeholder="Cure — surface under damp cloth"></image-slot>
+            <image-slot id="sculptural-5" src="images/sculptural-5.webp" shape="rect" swap="" placeholder="Carving and sanding — layers exposed"></image-slot>
           </div>
           <div>
             <div class="m-stage-num" style="font:700 62px/1 'Bodoni Moda',serif;color:var(--accent,#A34A24);margin-bottom:16px">04</div>
-            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Cure</div>
-            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">Two weeks in the dark, and it keeps moving.</h2>
-            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Slow hydration under damp cloth. Hairlines open, pigment migrates toward the edges, and the surface goes on changing after the form comes off. This is the entropy half of the title — and the half I like.</p>
+            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Erosion &amp; Discovery</div>
+            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">What's carved away stays visible.</h2>
+            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">The surface is sanded, scraped, and excavated, exposing hidden layers beneath. Rather than covering imperfections, the process embraces them as part of the final composition.</p>
             <div class="m-spec" style="display:flex;gap:26px;border-top:1px solid #D6CFC2;padding-top:14px;margin-top:22px;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
-              <span>[14] days</span><span>Damp cure</span><span>Unpredictable</span>
+              <span>Sanded</span><span>Excavated</span><span>Imperfection kept</span>
             </div>
           </div>
         </article>
@@ -173,15 +177,15 @@
         <article id="s05" data-reveal="" data-screen-label="Stage 05" class="m-stage" style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;padding:14px 0 56px;border-top:1px solid #D6CFC2;border-bottom:1px solid #D6CFC2;scroll-margin-top:100px">
           <div>
             <div class="m-stage-num" style="font:700 62px/1 'Bodoni Moda',serif;color:var(--accent,#A34A24);margin-bottom:16px">05</div>
-            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">Finish</div>
-            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">Ground back, then left open.</h2>
-            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Faces are ground and honed by hand until the aggregate reads, then left unsealed. The piece goes on ageing in whatever room it lives in — slowly, and not to my schedule.</p>
+            <div style="font:500 10px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:#5C564C;margin-bottom:12px">The Finished Work</div>
+            <h2 style="font:400 30px/1.24 'Newsreader',serif;font-style:italic;letter-spacing:-.01em;margin:0 0 14px;text-wrap:pretty">Architecture, material, and time.</h2>
+            <p style="font:400 14.5px/1.75 'Archivo',sans-serif;color:#4A443C;margin:0;text-wrap:pretty">Each piece becomes a tactile convergence of architecture, material, and time — a contemporary work shaped through traditional techniques and guided by the balance between control and discovery.</p>
             <div class="m-spec" style="display:flex;gap:26px;border-top:1px solid #D6CFC2;padding-top:14px;margin-top:22px;font:400 12px 'IBM Plex Mono',monospace;color:#5C564C">
-              <span>Hand-ground</span><span>Unsealed</span><span>Still ageing</span>
+              <span>Traditional technique</span><span>Contemporary form</span><span>Control &amp; chance</span>
             </div>
           </div>
           <div class="m-stage-img" style="height:420px;overflow:hidden;border:1px solid #D6CFC2;background:#F5F3EE">
-            <image-slot id="object-014" src="images/object-014.webp" shape="rect" swap placeholder="Finish — honed face, gallery-grade"></image-slot>
+            <image-slot id="object-014" src="images/object-014.webp" shape="rect" swap="" placeholder="Finished artwork — gallery-grade"></image-slot>
           </div>
         </article>
       </div>
@@ -190,8 +194,8 @@
 
   <section data-reveal="" data-screen-label="Process close" class="m-pad" style="max-width:1240px;margin:0 auto;padding:20px 48px 96px;box-sizing:border-box">
     <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:32px">
-      <p style="font:400 clamp(24px,3.2vw,38px)/1.28 'Newsreader',serif;font-style:italic;margin:0;max-width:720px;text-wrap:pretty">Order is what I bring. Entropy is what finishes the work.</p>
-      <div style="display:flex;gap:14px;flex-wrap:wrap">
+      
+      <p style="font:400 clamp(24px,3.2vw,38px)/1.28 'Newsreader',serif;font-style:italic;margin:0;max-width:720px;text-wrap:pretty">Let's connect to discuss a current piece, future project, or commissioned work.</p><div style="display:flex;gap:14px;flex-wrap:wrap">
         <a href="index.html#works" class="m-tap" style="border:1px solid #1B1917;padding:13px 24px;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;transition:background .25s,color .25s" style-hover="background:#1B1917;color:#F5F3EE">See the works</a>
         <a href="index.html#inquire" class="m-tap" style="background:var(--accent,#A34A24);color:#F5F3EE;padding:13px 24px;font:600 11px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;transition:background .25s" style-hover="background:#1B1917;color:#F5F3EE">Commission a piece</a>
       </div>
@@ -212,11 +216,24 @@
 <div style="display:none;width:0;height:0;overflow:hidden"><x-import component-from-global-scope="image-slot" from="./image-slot.js?v=20260731b" id="loader-slot" hint-size="0,0"></x-import></div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#A34A24&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#A34A24&quot;,&quot;#6E4B2A&quot;,&quot;#2F4636&quot;,&quot;#1B1917&quot;]}}">
+const HERO_SLIDES = [
+  { id: 'process-hero', src: 'images/process-hero.webp', placeholder: 'Studio — wide shot, work in progress' },
+  { id: 'process-hero-2', src: 'images/process-hero-2.webp', placeholder: 'Studio — detail, second angle' },
+  { id: 'process-hero-3', src: 'images/process-hero-3.webp', placeholder: 'Studio — detail, third angle' },
+  { id: 'process-hero-4', src: 'images/process-hero-4.webp', placeholder: 'Studio — detail, fourth angle' },
+];
+
 class Component extends DCLogic {
-  state = { scrolled: false, navOpen: false, navHidden: false, topVisible: false };
+  state = { scrolled: false, navOpen: false, navHidden: false, topVisible: false, heroIndex: 0 };
 
   componentDidMount() {
     this.applyAccent();
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if (!reduced) {
+      this._heroTimer = setInterval(() => {
+        this.setState((st) => ({ heroIndex: (st.heroIndex + 1) % HERO_SLIDES.length }));
+      }, 3500);
+    }
     this._onScroll = () => {
       const y = window.scrollY;
       const sc = y > 8;
@@ -246,12 +263,19 @@ class Component extends DCLogic {
   componentWillUnmount() {
     window.removeEventListener('scroll', this._onScroll);
     if (this._io) this._io.disconnect();
+    if (this._heroTimer) clearInterval(this._heroTimer);
   }
   componentDidUpdate() { this.applyAccent(); }
   applyAccent() { document.body.style.setProperty('--accent', this.props.accent ?? '#A34A24'); }
 
   renderVals() {
     return {
+      heroSlides: HERO_SLIDES.map((s, i) => ({
+        id: s.id, src: s.src, placeholder: s.placeholder,
+        loading: i === 0 ? 'eager' : 'lazy',
+        op: i === this.state.heroIndex ? 1 : 0,
+        z: i === this.state.heroIndex ? 2 : 1,
+      })),
       copyrightYear: new Date().getFullYear(),
       navShadow: this.state.scrolled ? '0 10px 32px rgba(27,25,23,.10)' : 'none',
       navOpen: this.state.navOpen,

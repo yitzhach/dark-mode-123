@@ -380,6 +380,31 @@
   };
   // Cross-slot "copy look / paste look" clipboard (session-scoped).
   let lookClip = null;
+
+  // ── Image clipboard ─────────────────────────────────────────────────────
+  // Copy an image from one slot and paste it into another (⌘C/⌘V, or the
+  // Copy/Paste controls). What's copied is the slot's effective image URL —
+  // usually 'images/<id>.webp' — so a paste costs NO new pixels: the target
+  // slot just points at the same file. Crop resets (the new frame is a
+  // different shape); the look (`a`) travels with it. A path-shaped clip
+  // persists to localStorage so a copy survives a page navigation; raw
+  // data-URL bytes (a not-yet-baked drop) stay session-scoped.
+  const CLIP_KEY = 'image-slot.clip';
+  let imgClip = null;
+  try {
+    const raw = localStorage.getItem(CLIP_KEY);
+    if (raw) imgClip = JSON.parse(raw);
+  } catch (e) {}
+  function setImgClip(v) {
+    imgClip = v && v.u ? v : null;
+    try {
+      if (imgClip && !isData(imgClip.u)) localStorage.setItem(CLIP_KEY, JSON.stringify(imgClip));
+      else localStorage.removeItem(CLIP_KEY);
+    } catch (e) {}
+    subs.forEach((fn) => fn());
+  }
+  // The slot under the pointer owns the keyboard shortcuts.
+  let hotSlot = null;
   let filterSvg = null;
   function filterHost() {
     if (filterSvg && filterSvg.isConnected) return filterSvg;
@@ -559,6 +584,10 @@
     '.ctl{position:absolute;inset:auto;top:8px;right:8px;margin:0;border:0;padding:0;' +
     '  background:transparent;overflow:visible;' +
     '  display:flex;gap:6px;opacity:0;pointer-events:none;transition:opacity .12s;z-index:2;' +
+    // Wraps to a second row rather than spilling off a narrow card (a 3-up
+    // grid column is ~266px, less than the full strip). Right-aligned so it
+    // stays anchored to the frame's top-right corner either way.
+    '  flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 16px);' +
     '  white-space:nowrap}' +
     // While reframing, the spill owns the top layer and would swallow every
     // click on the in-frame controls. Promoting .ctl into the top layer
@@ -600,6 +629,16 @@
     '.adj button[data-act="look-eye"]{min-width:34px}' +
     '.adj button[data-act="look-eye"][data-on]{background:rgba(255,255,255,.30);color:#fff}' +
     '.ctl button[data-act="adjust"][data-on]{background:#c96442;color:#fff}' +
+    // Paste only appears when there is something on the image clipboard.
+    '.ctl button[data-act="paste"]{display:none}' +
+    ':host([data-clip]) .ctl button[data-act="paste"]{display:inline-block}' +
+    '.ctl button[data-act="copy"][data-on]{background:#c96442;color:#fff}' +
+    // Empty slots get their own paste affordance (they have no hover strip).
+    '.pastebtn{display:none;margin-top:4px;font:500 11px/1 ui-sans-serif,system-ui,sans-serif;' +
+    '  padding:5px 9px;border:0;border-radius:6px;cursor:pointer;color:#fff;' +
+    '  background:rgba(20,18,16,.82)}' +
+    '.pastebtn:hover{background:#c96442}' +
+    ':host([data-clip][data-editable]:not([data-filled])) .pastebtn{display:inline-block}' +
     '.ctl button[data-act="reset"]{display:none}' +
     ':host([data-reframe]) .ctl button[data-act="reset"]{display:inline-block}' +
     '.ctl button[data-act="remove"]{padding:5px 8px;font-size:12px;line-height:1}' +
@@ -739,7 +778,8 @@
         '  <img class="b" part="image-second" alt="" draggable="false" loading="lazy" decoding="async" style="display:none">' +
         '  <div class="empty" part="empty">' + icon +
         '    <div class="cap"></div>' +
-        '    <div class="sub">or <u>browse files</u></div></div>' +
+        '    <div class="sub">or <u>browse files</u></div>' +
+        '    <button class="pastebtn" data-act="paste" data-dc-edit-transparent>Paste image</button></div>' +
         '  <div class="attr-error" part="attribution-error">' + warnIcon +
         '    <div class="cap">This photo needs attribution</div></div>' +
         '  <div class="ring" part="ring"></div>' +
@@ -764,6 +804,8 @@
         '  <button data-act="edit" title="Reframe image">Edit</button>' +
         '  <button data-act="adjust" title="Adjust contrast, colour and tone">Adjust</button>' +
         '  <button data-act="two" title="Second image \u2014 shown on hover">Img 2</button>' +
+        '  <button data-act="copy" title="Copy this image (\u2318C)">Copy</button>' +
+        '  <button data-act="paste" title="Paste the copied image (\u2318V)">Paste</button>' +
         '  <button data-act="reset" title="Reset size, stretch and position">Reset</button>' +
         '  <button data-act="remove" title="Remove image">✕</button></div>' +
         '<input type="file" accept="' + ACCEPT.join(',') + '" hidden>';
@@ -851,7 +893,12 @@
       this._subFn = () => this._render();
       // Shadow-DOM listeners live with the shadow DOM — bound once here so
       // disconnect/reconnect (e.g. React remount) doesn't stack handlers.
-      this._empty.addEventListener('click', () => this._input.click());
+      this._empty.addEventListener('click', (e) => {
+        // The Paste button lives inside .empty; let it reach the data-act
+        // handler instead of opening the file picker.
+        if (e.target && e.target.closest && e.target.closest('[data-act]')) return;
+        this._input.click();
+      });
       root.addEventListener('click', (e) => {
         const act = e.target && e.target.getAttribute && e.target.getAttribute('data-act');
         if (!act) return;
@@ -881,6 +928,8 @@
           }
           return;
         }
+        if (act === 'copy') { this._disarm(); this._copyImage(); return; }
+        if (act === 'paste') { this._disarm(); this._pasteImage(); return; }
         if (act === 'reset') {
           this._disarm();
           this._view.s = 1; this._view.r = 1; this._view.x = 0; this._view.y = 0;
@@ -1118,6 +1167,10 @@
       // The host may inject window.omelette.writeFile AFTER the first render;
       // re-render on hover so the editable-gated controls reliably appear.
       this.addEventListener('pointerenter', this._subFn);
+      this._hot = () => { hotSlot = this; };
+      this._notHot = () => { if (hotSlot === this) hotSlot = null; };
+      this.addEventListener('pointerenter', this._hot);
+      this.addEventListener('pointerleave', this._notHot);
       // width%/height% in _applyView encode the frame aspect at call time —
       // a host resize (responsive grid, pane divider) would stretch the
       // image until the next _render. Re-render on size change: _render()
@@ -1206,6 +1259,9 @@
     disconnectedCallback() {
       subs.delete(this._subFn);
       this.removeEventListener('pointerenter', this._subFn);
+      this.removeEventListener('pointerenter', this._hot);
+      this.removeEventListener('pointerleave', this._notHot);
+      if (hotSlot === this) hotSlot = null;
       this.removeEventListener('dragenter', this);
       this.removeEventListener('dragover', this);
       this.removeEventListener('dragleave', this);
@@ -1306,7 +1362,7 @@
       try { this._twoPanel.hidePopover(); } catch (e) {}
       if (!this.hasAttribute('data-reframe')) {
         try { this._ctl.hidePopover(); } catch (e) {}
-        this._ctl.style.left = ''; this._ctl.style.top = '';
+        this._ctl.style.left = ''; this._ctl.style.top = ''; this._ctl.style.maxWidth = '';
       }
     }
 
@@ -1438,7 +1494,7 @@
       }
       try { this._spill.hidePopover(); } catch {}
       try { this._ctl.hidePopover(); } catch {}
-      this._ctl.style.left = ''; this._ctl.style.top = '';
+      this._ctl.style.left = ''; this._ctl.style.top = ''; this._ctl.style.maxWidth = '';
       if (commit) this._commitView();
       if (this._t2) {
         this._t2 = false;
@@ -1633,6 +1689,7 @@
           const r = this.getBoundingClientRect();
           this._ctl.style.left = (r.right - 8) + 'px';
           this._ctl.style.top = (r.top + 8) + 'px';
+          this._ctl.style.maxWidth = Math.max(120, r.width - 16) + 'px';
         }
       }
       this._layout(this._img, this._viewA);
@@ -1717,7 +1774,7 @@
       if (this._adjWatchId) { cancelAnimationFrame(this._adjWatchId); this._adjWatchId = 0; }
       try { this._adjPanel.hidePopover(); } catch {}
       try { this._ctl.hidePopover(); } catch {}
-      this._ctl.style.left = ''; this._ctl.style.top = '';
+      this._ctl.style.left = ''; this._ctl.style.top = ''; this._ctl.style.maxWidth = '';
       this._commitAdj();
     }
 
@@ -1736,6 +1793,7 @@
       // Keep the hover controls pinned to the frame while the panel is open.
       this._ctl.style.left = (r.right - 8) + 'px';
       this._ctl.style.top = (r.top + 8) + 'px';
+      this._ctl.style.maxWidth = Math.max(120, r.width - 16) + 'px';
     }
 
     _syncAdjUI() {
@@ -1802,6 +1860,50 @@
       setSlot(id, v);
     }
 
+    // ── Copy / paste an image between slots ───────────────────────────────
+    _copyImage() {
+      const u = this._img.getAttribute('src') || '';
+      if (!u || !this.hasAttribute('data-filled')) return false;
+      const st = (this.id ? getSlot(this.id) : this._local) || {};
+      const hiId = this.getAttribute('hires-target');
+      const hi = hiId ? ((getSlot(hiId) || {}).u || '') : '';
+      setImgClip({ u, a: st.a || null, hi, from: this.id || '' });
+      this._flash('copy', 'Copied');
+      return true;
+    }
+
+    _pasteImage() {
+      if (!imgClip || !imgClip.u) return false;
+      if (!this.hasAttribute('data-editable')) return false;
+      this._exitReframe(false);
+      // Crop resets — the source framing was chosen for a different frame.
+      const val = { u: imgClip.u, s: 1, x: 0, y: 0 };
+      if (imgClip.a) val.a = imgClip.a;
+      if (this.id) setSlot(this.id, val);
+      else { this._local = val; this._render(); }
+      // Carry the hi-res companion across too, so the lightbox stays sharp.
+      const hiId = this.getAttribute('hires-target');
+      if (hiId && imgClip.hi) setSlot(hiId, { u: imgClip.hi, s: 1, x: 0, y: 0 });
+      this._flash('paste', 'Pasted');
+      return true;
+    }
+
+    // Momentary label swap on a control button — the only feedback these
+    // two actions produce (a copy changes nothing on screen).
+    _flash(act, label) {
+      const b = this._ctl && this._ctl.querySelector('button[data-act="' + act + '"]');
+      if (!b) return;
+      if (this._flashT) { clearTimeout(this._flashT); }
+      if (!b.dataset.label) b.dataset.label = b.textContent;
+      b.textContent = label;
+      b.setAttribute('data-on', '');
+      this._flashT = setTimeout(() => {
+        b.textContent = b.dataset.label || b.textContent;
+        b.removeAttribute('data-on');
+        this._flashT = 0;
+      }, 1100);
+    }
+
     _render() {
       // Shape / mask. Presets use border-radius so the dashed ring can
       // follow the rounded outline; clip-path is only applied for an
@@ -1825,6 +1927,7 @@
       const editable = !!(window.omelette && window.omelette.writeFile);
       this.toggleAttribute('data-editable', editable);
       this._sub.style.display = editable ? '' : 'none';
+      this.toggleAttribute('data-clip', !!(editable && imgClip && imgClip.u));
 
       // Content. The sidecar is also writable by the agent's write_file
       // tool, so its value isn't guaranteed canvas-originated — only accept
@@ -2132,7 +2235,43 @@
     // CSS filter value for a slot's saved look — pages apply it to their own
     // <img> (lightbox, hero crossfade) so the look travels with the image.
     filter: (id) => { const v = getSlot(id); return adjFilter(id, v && v.a); },
+    // Image clipboard (shared with ⌘C/⌘V and the Copy/Paste controls).
+    clip: () => (imgClip ? Object.assign({}, imgClip) : null),
+    setClip: (v) => setImgClip(v),
   };
+
+  // ── Clipboard wiring ──────────────────────────────────────────────────
+  // ⌘C over a slot copies its image; ⌘V pastes. An OS-clipboard image
+  // (right-click → Copy image, a screenshot, a file copied in Finder) wins
+  // over the internal clip, so an outside picture can be pasted straight in.
+  function typingTarget() {
+    let el = document.activeElement;
+    while (el && el.shadowRoot && el.shadowRoot.activeElement) el = el.shadowRoot.activeElement;
+    if (!el) return false;
+    const tag = (el.tagName || '').toLowerCase();
+    return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable;
+  }
+  const selectionCollapsed = () => {
+    try { const s = window.getSelection(); return !s || s.isCollapsed; } catch (e) { return true; }
+  };
+
+  document.addEventListener('copy', (e) => {
+    if (!editableNow() || !hotSlot || typingTarget() || !selectionCollapsed()) return;
+    if (!hotSlot.hasAttribute('data-filled')) return;
+    if (hotSlot._copyImage()) e.preventDefault();
+  }, true);
+
+  document.addEventListener('paste', (e) => {
+    if (!editableNow() || !hotSlot || typingTarget()) return;
+    const dt = e.clipboardData;
+    const file = dt && dt.files && dt.files.length ? dt.files[0] : null;
+    if (file && ACCEPT.indexOf(file.type) >= 0) {
+      e.preventDefault();
+      hotSlot._ingest(file);
+      return;
+    }
+    if (imgClip && imgClip.u && hotSlot._pasteImage()) e.preventDefault();
+  }, true);
 
   if (!customElements.get('image-slot')) {
     customElements.define('image-slot', ImageSlot);
